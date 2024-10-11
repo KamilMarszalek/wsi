@@ -1,13 +1,22 @@
-import time 
+import time
 import numpy as np
 from analyze_all_combs import analyze_all_combs
+from random import randint
 
-m = np.array([8, 3, 5, 2]) # mass of the objects
-M = np.sum(m) / 2 # maximum mass of the objects
-p = np.array([16, 8, 9, 6]) # price of the objects
+NUM_OF_ELEMENTS = 21
+
+m = np.array([randint(1, 100) for _ in range(NUM_OF_ELEMENTS)])  # mass of the objects
+M = np.sum(m) / 2  # maximum mass of the objects
+p = np.array([randint(1, 100) for _ in range(NUM_OF_ELEMENTS)])  # price of the objects
+
+
 def main():
-    print("Hello world!")
-    analyze_all_combs(m, M, p)
+    start = time.process_time()
+    result = analyze_all_combs(m, M, p)
+    end = time.process_time()
+    total = end - start
+    print(result)
+    print("Time:", "{0:02f}s".format(total))
 
 
 if __name__ == "__main__":
