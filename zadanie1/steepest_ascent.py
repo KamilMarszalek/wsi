@@ -2,23 +2,23 @@ from autograd import grad
 import numpy as np
 import cec2017
 from cec2017.functions import f1
+from plot import plot, draw_arrow
 
 
-def steepest_ascent(point, function, beta, precision=0.000001):
+def steepest_ascent(point, function, beta, precision=0.000001, minimize=True, limit=10):
     points = [point]
-    while not stop(function, points, beta, precision):
-        grad_fct = grad(function)
+    grad_fct = grad(function)
+    step = np.subtract if minimize > 0 else np.add
+    while not stop(grad_fct(points[-1]), points, precision):
         gradients = grad_fct(points[-1])
-        points.append(np.add(points[-1], beta * gradients))
+        points.append(np.clip(-limit, limit, step(points[-1], beta * gradients)))
     return points
 
 
-def stop(function, points, beta, precision):
+def stop(gradient, points, precision):
     if len(points) > 10000:
         return True
-    if len(points) < 2:
-        return False
-    return abs(function(points[-1]) - function(points[-2])) < precision
+    return np.linalg.norm(gradient) < precision
 
 
 if __name__ == "__main__":
@@ -26,8 +26,10 @@ if __name__ == "__main__":
     def booth(x):
         return (x[0] + 2 * x[1] - 7) ** 2 + (2 * x[0] + x[1] - 5) ** 2
 
-    points = steepest_ascent(np.array([10, 10], dtype=float), booth, -0.0999)
+    x = np.random.uniform(-10, 10, 2)
+    points = steepest_ascent(x, booth, 0.08)
     print("End")
     # print("Points:", points)
-    print("Function value:", booth(points[-1]))
+    print("Function value:", f1(points[-1]))
     print("End: ", points[-1])
+    plot(booth, 10, 0.1, points)
