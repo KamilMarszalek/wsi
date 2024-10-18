@@ -5,13 +5,13 @@ from booth import booth
 from plot import plot
 
 
-LIMIT = 10
-MAX_ITER = 100000
-FUNCTION = booth
+LIMIT = 100
+MAX_ITER = 20000
+FUNCTION = f3
 GRAD_LIMIT = 100
-PRECISION = 0.000001
-DIMENSIONS = 2
-BETA = 0.1
+PRECISION = 0.001
+DIMENSIONS = 10
+BETA = 0.00000002
 
 
 def steepest_ascent(
@@ -20,21 +20,24 @@ def steepest_ascent(
     points = [point]
     grad_fct = grad(function)
     step = np.subtract if minimize else np.add
-    while not stop(grad_fct(points[-1]), points, precision):
-        gradients = np.clip(grad_fct(points[-1]), -GRAD_LIMIT, GRAD_LIMIT)
+    while not stop(function, grad_fct(points[-1]), points, precision):
+        # gradients = np.clip(grad_fct(points[-1]), -GRAD_LIMIT, GRAD_LIMIT)
+        # gradients = grad_fct(points[-1]) / np.linalg.norm(grad_fct(points[-1]))
+        gradients = grad_fct(points[-1])
         points.append(np.clip(step(points[-1], beta * gradients), -limit, limit))
-        # print("Point:", points[-1])
+        print("Point:", points[-1])
+        print("len of vect: ", np.linalg.norm(gradients))
     return points
 
 
-def stop(gradient, points, precision, precision2=PRECISION):
+def stop(function, gradient, points, precision, precision2=PRECISION):
     if len(points) > MAX_ITER:
         return True
     if len(points) < 2:
         return False
     return (
         np.linalg.norm(gradient) < precision
-        or np.linalg.norm(points[-1] - points[-2]) < precision2
+        or np.linalg.norm(function(points[-1]) - function(points[-2])) < precision2
     )
 
 
