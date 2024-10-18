@@ -1,0 +1,6 @@
+MAX_ITER = 10000
+LIMIT = 100
+PRECISION = 0.001
+DIMENSIONS = 10
+BETA = 5e-9
+COLORS = ["red", "blue", "green"]

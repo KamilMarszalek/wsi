@@ -20,9 +20,10 @@ def draw_contour(
             point[dimension_2] = Y[i, j]
             Z[i, j] = function(point)
     plt.contour(X, Y, Z, 20)
+    name_axes(dimension_1, dimension_2)
 
 
-def draw_arrow(point_a, point_b, dimension_1, dimension_2):
+def draw_arrow(point_a, point_b, dimension_1, dimension_2, color):
     dx = point_b[dimension_1] - point_a[dimension_1]
     dy = point_b[dimension_2] - point_a[dimension_2]
     head_width = ARROW_SIZE
@@ -34,6 +35,41 @@ def draw_arrow(point_a, point_b, dimension_1, dimension_2):
         dy,
         head_width=head_width,
         head_length=head_length,
-        fc="k",
-        ec="k",
+        fc=color,
+        ec=color,
+    )
+
+
+def draw_arrows(points, color):
+    for i in range(len(points) - 1):
+        draw_arrow(points[i], points[i + 1], 0, 1, color)
+
+
+def name_axes(dimension_1, dimension_2):
+    plt.xlabel(f"X{dimension_1}")
+    plt.ylabel(f"X{dimension_2}")
+
+
+def description(
+    starting_point,
+    end_point,
+    end_value,
+    beta,
+    counter,
+    color,
+    dimension_1=0,
+    dimension_2=1,
+):
+    description_text = (
+        f"Start: [{starting_point[dimension_1]:.2f}, {starting_point[dimension_2]:.2f}]  "
+        f"End: [{end_point[dimension_1]:.2f}, {end_point[dimension_2]:.2f}]  "
+        f"End value: {end_value:.2f}  Beta: {beta}"
+    )
+    plt.text(
+        0,
+        120 - counter * 10,
+        description_text,
+        fontsize=10,
+        color=color,
+        ha="center",
     )
