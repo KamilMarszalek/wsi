@@ -1,14 +1,12 @@
 import matplotlib.pyplot as plt
-import cec2017
 import numpy as np
 
-from cec2017.functions import f1
-
 ARROW_SIZE = 1
+DIMENSIONS = 10
 
 
-def plot(
-    function, limit, plot_step, points, dimension_1=0, dimension_2=1, dimensions=10
+def draw_contour(
+    function, limit, plot_step, dimension_1=0, dimension_2=1, dimensions=DIMENSIONS
 ):
     x_arr = np.arange(-limit, limit, plot_step)
     y_arr = np.arange(-limit, limit, plot_step)
@@ -22,10 +20,6 @@ def plot(
             point[dimension_2] = Y[i, j]
             Z[i, j] = function(point)
     plt.contour(X, Y, Z, 20)
-    plt.colorbar()
-    for i in range(len(points) - 1):
-        draw_arrow(points[i], points[i + 1], dimension_1, dimension_2)
-    plt.show()
 
 
 def draw_arrow(point_a, point_b, dimension_1, dimension_2):
@@ -43,8 +37,3 @@ def draw_arrow(point_a, point_b, dimension_1, dimension_2):
         fc="k",
         ec="k",
     )
-
-
-if __name__ == "__main__":
-    plot(f1, 10, 0.1)
-    plt.show()

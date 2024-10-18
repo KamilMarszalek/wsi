@@ -2,16 +2,17 @@ from autograd import grad
 import numpy as np
 from cec2017.functions import f1, f2, f3
 from booth import booth
-from plot import plot
+from plot import draw_contour, draw_arrow
+import matplotlib.pyplot as plt
 
 
 LIMIT = 100
 MAX_ITER = 20000
-FUNCTION = f3
+FUNCTION = f1
 GRAD_LIMIT = 100
 PRECISION = 0.001
 DIMENSIONS = 10
-BETA = 0.00000002
+BETA = 0.000000001
 
 
 def steepest_ascent(
@@ -21,8 +22,6 @@ def steepest_ascent(
     grad_fct = grad(function)
     step = np.subtract if minimize else np.add
     while not stop(function, grad_fct(points[-1]), points, precision):
-        # gradients = np.clip(grad_fct(points[-1]), -GRAD_LIMIT, GRAD_LIMIT)
-        # gradients = grad_fct(points[-1]) / np.linalg.norm(grad_fct(points[-1]))
         gradients = grad_fct(points[-1])
         points.append(np.clip(step(points[-1], beta * gradients), -limit, limit))
         print("Point:", points[-1])
@@ -43,9 +42,11 @@ def stop(function, gradient, points, precision, precision2=PRECISION):
 
 if __name__ == "__main__":
     x = np.random.uniform(-LIMIT, LIMIT, DIMENSIONS)
-    # x = np.array([0.0, 0.0])
     points = steepest_ascent(x, FUNCTION, BETA)
     print("End")
     print("Function value:", FUNCTION(points[-1]))
     print("End: ", points[-1])
-    plot(FUNCTION, LIMIT, 1, points)
+    draw_contour(FUNCTION, LIMIT, 1)
+    for i in range(len(points) - 1):
+        draw_arrow(points[i], points[i + 1], 0, 1)
+    plt.show()
