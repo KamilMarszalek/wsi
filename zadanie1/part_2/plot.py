@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
-ARROW_SIZE = 1
-DIMENSIONS = 10
+from constants import ARROW_SIZE, DIMENSIONS
 
 
 def draw_contour(
@@ -40,9 +38,9 @@ def draw_arrow(point_a, point_b, dimension_1, dimension_2, color):
     )
 
 
-def draw_arrows(points, color):
+def draw_arrows(points, color, dimension_1=0, dimension_2=1):
     for i in range(len(points) - 1):
-        draw_arrow(points[i], points[i + 1], 0, 1, color)
+        draw_arrow(points[i], points[i + 1], dimension_1, dimension_2, color)
 
 
 def name_axes(dimension_1, dimension_2):
