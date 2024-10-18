@@ -11,9 +11,9 @@ class Solution(Enum):
     HEURISTIC = 1
 
 
-SOLUTION = Solution.HEURISTIC
+SOLUTION = Solution.ALL_COMBINATIONS
 
-NUM_OF_ELEMENTS = 101
+NUM_OF_ELEMENTS = 20
 
 
 m = np.array([randint(1, 100) for _ in range(NUM_OF_ELEMENTS)])  # mass of the objects
