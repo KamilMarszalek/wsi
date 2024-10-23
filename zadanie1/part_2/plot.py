@@ -63,9 +63,10 @@ def description(
         f"End: [{end_point[dimension_1]:.2f}, {end_point[dimension_2]:.2f}]  "
         f"End value: {end_value:.2f}  Beta: {beta}"
     )
+    description_text = description_text.replace(".", ",")
     plt.text(
         0,
-        120 - counter * 10,
+        123 - counter * 10,
         description_text,
         fontsize=10,
         color=color,

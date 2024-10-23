@@ -61,7 +61,7 @@ def generate_data():
     data_1 = {"n": [], "max_price": [], "mass_of_prods": [], "time": []}
     data_2 = {"n": [], "max_price": [], "mass_of_prods": [], "time": []}
 
-    for i in range(5, 26, 5):
+    for i in ELEMENTS:
         for _ in range(25):
             m = np.array([randint(1, 100) for _ in range(i)])  # mass of the objects
             M = np.sum(m) / 2  # maximum mass of the objects
@@ -192,7 +192,7 @@ def table_of_times():
 
 if __name__ == "__main__":
     # main()
-    # generate_data()
+    generate_data()
     df_1 = pd.read_csv("all_combinations.csv")
     df_2 = pd.read_csv("heuristic_solution.csv")
     compare = pd.concat([df_1, df_2], axis=1)

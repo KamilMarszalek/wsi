@@ -9,10 +9,10 @@ from concurrent.futures import ThreadPoolExecutor
 
 
 # BETA = 1e-9  # f1
-# BETA = 1e-15  # f2
-# BETA = 2e-8  # f3
-BETA = 0.12  # booth
-FUNCTION = booth
+# BETA = 1e-18  # f2
+BETA = 1e-9  # f3
+# BETA = 0.03  # booth
+FUNCTION = f3
 DIM_1 = 0
 DIM_2 = 1
 
@@ -20,7 +20,7 @@ DIM_2 = 1
 def worker(i):
     x = np.random.uniform(-LIMIT, LIMIT, DIMENSIONS)
     print(f"Start {i}: ", x)
-    points = steepest_ascent_classic(x, FUNCTION, BETA)
+    points = steepest_ascent_barzilai_borwein(x, FUNCTION, BETA)
     print(f"End {i}")
     print(f"Function value {i}:", FUNCTION(points[-1]))
     print(f"End {i}: ", points[-1])
