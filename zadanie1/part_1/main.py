@@ -16,7 +16,7 @@ class Solution(Enum):
 
 SOLUTION = Solution.BOTH
 
-NUM_OF_ELEMENTS = 25
+NUM_OF_ELEMENTS = 20
 ELEMENTS = [5, 10, 15, 20, 25]
 
 
@@ -26,35 +26,45 @@ p = np.array([randint(1, 100) for _ in range(NUM_OF_ELEMENTS)])  # price of the 
 
 
 def handle_generating_all_combinations():
-    print("Generating all combinations:")
     start = time.process_time()
     result = analyze_all_combs(m, M, p)
     end = time.process_time()
     total = end - start
-    print("Max price:", result[0], "Mass of prods:", result[1])
-    print("Time:", "{0:02f}s".format(total), "\n")
+    return result[0], result[1], total
 
 
 def handle_heuristic_solution():
-    print("Heuristic solution:")
     start = time.process_time()
     result = heuristic_solution(m, M, p)
     end = time.process_time()
     total = end - start
+    return result[0], result[1], total
+
+
+def print_results(result):
     print("Max price:", result[0], "Mass of prods:", result[1])
-    print("Time:", "{0:02f}s".format(total))
+    print("Time:", "{0:02f}s".format(result[2]), "\n")
 
 
 def main():
     print("Mass limit:", M, "\n")
 
     if SOLUTION == Solution.ALL_COMBINATIONS:
-        handle_generating_all_combinations()
+        print("Generating all combinations:")
+        result = handle_generating_all_combinations()
+        print_results(result)
+
     elif SOLUTION == Solution.HEURISTIC:
-        handle_heuristic_solution()
+        print("Heuristic solution:")
+        result = handle_heuristic_solution()
+        print_results(result)
     else:
-        handle_generating_all_combinations()
-        handle_heuristic_solution()
+        print("Generating all combinations:")
+        result = handle_generating_all_combinations()
+        print_results(result)
+        print("Heuristic solution:")
+        result = handle_heuristic_solution()
+        print_results(result)
 
 
 def generate_data():
@@ -191,12 +201,12 @@ def table_of_times():
 
 
 if __name__ == "__main__":
-    # main()
-    generate_data()
-    df_1 = pd.read_csv("all_combinations.csv")
-    df_2 = pd.read_csv("heuristic_solution.csv")
-    compare = pd.concat([df_1, df_2], axis=1)
-    create_table("all_combinations", df_1)
-    create_table("heuristic_solution", df_2)
-    compare_max_price()
-    table_of_times()
+    main()
+    # generate_data()
+    # df_1 = pd.read_csv("all_combinations.csv")
+    # df_2 = pd.read_csv("heuristic_solution.csv")
+    # compare = pd.concat([df_1, df_2], axis=1)
+    # create_table("all_combinations", df_1)
+    # create_table("heuristic_solution", df_2)
+    # compare_max_price()
+    # table_of_times()
