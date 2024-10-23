@@ -1,7 +1,8 @@
 import numpy as np
+from typing import Tuple
 
 
-def increment_binary_mask(bin_mask, n):
+def increment_binary_mask(bin_mask: np.ndarray, n: int) -> None:
     for i in reversed(range(n)):
         if bin_mask[i] == 0:
             bin_mask[i] = 1
@@ -10,7 +11,9 @@ def increment_binary_mask(bin_mask, n):
             bin_mask[i] = 0
 
 
-def analyze_all_combs(mass, mass_limit, price):
+def analyze_all_combs(
+    mass: np.ndarray, mass_limit: float, price: np.ndarray
+) -> Tuple[int, int]:
     bin_length = len(mass)
     max_price = 0
     max_mass = 0

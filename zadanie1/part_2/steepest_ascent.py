@@ -1,11 +1,17 @@
 from autograd import grad
 import numpy as np
+from typing import Callable, List
 from constants import LIMIT, MAX_ITER, PRECISION
 
 
 def steepest_ascent_classic(
-    point, function, beta, precision=PRECISION, minimize=True, limit=LIMIT
-):
+    point: np.ndarray,
+    function: Callable[[np.ndarray], float],
+    beta: float,
+    precision: float = PRECISION,
+    minimize: bool = True,
+    limit: float = LIMIT,
+) -> List[np.ndarray]:
     points = [point]
     grad_fct = grad(function)
     step = np.subtract if minimize else np.add
@@ -16,8 +22,13 @@ def steepest_ascent_classic(
 
 
 def steepest_ascent_barzilai_borwein(
-    point, function, beta, precision=PRECISION, minimize=True, limit=LIMIT
-):
+    point: np.ndarray,
+    function: Callable[[np.ndarray], float],
+    beta: float,
+    precision: float = PRECISION,
+    minimize: bool = True,
+    limit: float = LIMIT,
+) -> List[np.ndarray]:
     points = [point]
     grad_fct = grad(function)
     step = np.subtract if minimize else np.add
@@ -34,7 +45,13 @@ def steepest_ascent_barzilai_borwein(
     return points
 
 
-def stop(function, gradient, points, precision, precision2=PRECISION):
+def stop(
+    function: Callable[[np.ndarray], float],
+    gradient: np.ndarray,
+    points: List[np.ndarray],
+    precision: float,
+    precision2: float = PRECISION,
+) -> bool:
     if len(points) > MAX_ITER:
         return True
     if len(points) < 2:

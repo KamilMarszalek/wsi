@@ -12,12 +12,12 @@ from concurrent.futures import ThreadPoolExecutor
 # BETA = 1e-18  # f2
 BETA = 1e-9  # f3
 # BETA = 0.03  # booth
-FUNCTION = f3
+FUNCTION = f1
 DIM_1 = 0
 DIM_2 = 1
 
 
-def worker(i):
+def worker(i: int) -> bool:
     x = np.random.uniform(-LIMIT, LIMIT, DIMENSIONS)
     print(f"Start {i}: ", x)
     points = steepest_ascent_barzilai_borwein(x, FUNCTION, BETA)

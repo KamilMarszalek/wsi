@@ -1,11 +1,12 @@
 import time
 import numpy as np
-from analyze_all_combs import analyze_all_combs
-from heuristic_solution import heuristic_solution
-from random import randint
-from enum import Enum
 import pandas as pd
 import matplotlib.pyplot as plt
+from random import randint
+from enum import Enum
+from typing import List, Tuple
+from analyze_all_combs import analyze_all_combs
+from heuristic_solution import heuristic_solution
 
 
 class Solution(Enum):
@@ -25,7 +26,7 @@ M = np.sum(m) / 2  # maximum mass of the objects
 p = np.array([randint(1, 100) for _ in range(NUM_OF_ELEMENTS)])  # price of the objects
 
 
-def handle_generating_all_combinations():
+def handle_generating_all_combinations() -> Tuple[int, int, float]:
     start = time.process_time()
     result = analyze_all_combs(m, M, p)
     end = time.process_time()
@@ -33,7 +34,7 @@ def handle_generating_all_combinations():
     return result[0], result[1], total
 
 
-def handle_heuristic_solution():
+def handle_heuristic_solution() -> Tuple[int, int, float]:
     start = time.process_time()
     result = heuristic_solution(m, M, p)
     end = time.process_time()
@@ -41,12 +42,12 @@ def handle_heuristic_solution():
     return result[0], result[1], total
 
 
-def print_results(result):
+def print_results(result: Tuple[int, int, float]) -> None:
     print("Max price:", result[0], "Mass of prods:", result[1])
     print("Time:", "{0:02f}s".format(result[2]), "\n")
 
 
-def main():
+def main() -> None:
     print("Mass limit:", M, "\n")
 
     if SOLUTION == Solution.ALL_COMBINATIONS:
@@ -67,7 +68,26 @@ def main():
         print_results(result)
 
 
-def generate_data():
+def calculate_statistics(
+    df: pd.DataFrame, column: str
+) -> tuple[List, List, List, List]:
+    max_values = []
+    min_values = []
+    mean_values = []
+    std_values = []
+    for i in ELEMENTS:
+        max_values.append(max(df[df["n"] == i][column]))
+        min_values.append(min(df[df["n"] == i][column]))
+        mean_values.append(np.mean(df[df["n"] == i][column]))
+        std_values.append(np.std(df[df["n"] == i][column]))
+    return max_values, min_values, mean_values, std_values
+
+
+def format_dataframe(df: pd.DataFrame, decimal_places: int = 2) -> pd.DataFrame:
+    return df.map(lambda x: f"{x:.{decimal_places}f}".replace(".", ","))
+
+
+def generate_data() -> None:
     data_1 = {"n": [], "max_price": [], "mass_of_prods": [], "time": []}
     data_2 = {"n": [], "max_price": [], "mass_of_prods": [], "time": []}
 
@@ -103,7 +123,8 @@ def generate_data():
     df_2.to_csv("heuristic_solution.csv", index=False)
 
 
-def create_table(filename, dataframe):
+def create_table(filename: str, dataframe: pd.DataFrame) -> None:
+
     fig, ax = plt.subplots()
     ax.axis("off")
     ax.axis("tight")
@@ -117,7 +138,7 @@ def create_table(filename, dataframe):
     plt.clf()
 
 
-def compare_max_price():
+def compare_max_price() -> None:
     all_combs_df = pd.read_csv("all_combinations.csv")
     heuristic_df = pd.read_csv("heuristic_solution.csv")
     max_price_all_combs = all_combs_df["max_price"]
@@ -130,13 +151,7 @@ def compare_max_price():
             "DIFFERENCE": max_price_all_combs - max_price_heuristics,
         }
     )
-    max_diff = []
-    min_diff = []
-    mean_diff = []
-    for i in ELEMENTS:
-        max_diff.append(max(comparison_df[comparison_df["n"] == i]["DIFFERENCE"]))
-        min_diff.append(min(comparison_df[comparison_df["n"] == i]["DIFFERENCE"]))
-        mean_diff.append(np.mean(comparison_df[comparison_df["n"] == i]["DIFFERENCE"]))
+    max_diff, min_diff, mean_diff, _ = calculate_statistics(comparison_df, "DIFFERENCE")
     table_df = pd.DataFrame(
         {
             "n": ELEMENTS,
@@ -145,26 +160,16 @@ def compare_max_price():
             "MEAN DIFFERENCE": mean_diff,
         }
     )
-    table_df = table_df.map(lambda x: f"{x:.2f}".replace(".", ","))
+    table_df = format_dataframe(table_df)
     create_table("comparison_table", table_df)
 
 
-def table_of_times():
+def table_of_times() -> None:
     all_combs_df = pd.read_csv("all_combinations.csv")
     heuristic_df = pd.read_csv("heuristic_solution.csv")
-    times_all_combs = all_combs_df["time"]
-    times_heuristics = heuristic_df["time"]
-    max_time_all_combs = []
-    min_time_all_combs = []
-    mean_time_all_combs = []
-    std_time_all_combs = []
-    for i in ELEMENTS:
-        max_time_all_combs.append(max(all_combs_df[all_combs_df["n"] == i]["time"]))
-        min_time_all_combs.append(min(all_combs_df[all_combs_df["n"] == i]["time"]))
-        mean_time_all_combs.append(
-            np.mean(all_combs_df[all_combs_df["n"] == i]["time"])
-        )
-        std_time_all_combs.append(np.std(all_combs_df[all_combs_df["n"] == i]["time"]))
+    max_time_all_combs, min_time_all_combs, mean_time_all_combs, std_time_all_combs = (
+        calculate_statistics(all_combs_df, "time")
+    )
     temp = pd.DataFrame(
         {
             "n": ELEMENTS,
@@ -174,19 +179,15 @@ def table_of_times():
             "STANDARD DEVIATION": std_time_all_combs,
         }
     )
-    temp = temp.map(lambda x: f"{x:.6f}".replace(".", ","))
+    temp = format_dataframe(temp, 6)
     create_table("times_table_all_combinations", temp)
-    max_time_heuristics = []
-    min_time_heuristics = []
-    mean_time_heuristics = []
-    std_time_heuristics = []
-    for i in ELEMENTS:
-        max_time_heuristics.append(max(heuristic_df[heuristic_df["n"] == i]["time"]))
-        min_time_heuristics.append(min(heuristic_df[heuristic_df["n"] == i]["time"]))
-        mean_time_heuristics.append(
-            np.mean(heuristic_df[heuristic_df["n"] == i]["time"])
-        )
-        std_time_heuristics.append(np.std(heuristic_df[heuristic_df["n"] == i]["time"]))
+
+    (
+        max_time_heuristics,
+        min_time_heuristics,
+        mean_time_heuristics,
+        std_time_heuristics,
+    ) = calculate_statistics(heuristic_df, "time")
     temp = pd.DataFrame(
         {
             "n": ELEMENTS,
@@ -196,17 +197,16 @@ def table_of_times():
             "STANDARD DEVIATION": std_time_heuristics,
         }
     )
-    temp = temp.map(lambda x: f"{x:.6f}".replace(".", ","))
+    temp = format_dataframe(temp, 6)
     create_table("times_table_heuristics", temp)
 
 
 if __name__ == "__main__":
     main()
-    # generate_data()
-    # df_1 = pd.read_csv("all_combinations.csv")
-    # df_2 = pd.read_csv("heuristic_solution.csv")
-    # compare = pd.concat([df_1, df_2], axis=1)
-    # create_table("all_combinations", df_1)
-    # create_table("heuristic_solution", df_2)
-    # compare_max_price()
-    # table_of_times()
+    generate_data()
+    df_1 = pd.read_csv("all_combinations.csv")
+    df_2 = pd.read_csv("heuristic_solution.csv")
+    create_table("all_combinations", df_1)
+    create_table("heuristic_solution", df_2)
+    compare_max_price()
+    table_of_times()

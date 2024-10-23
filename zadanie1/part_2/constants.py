@@ -1,6 +1,6 @@
 MAX_ITER = 10000
 LIMIT = 100
-PRECISION = 1e-8
+PRECISION = 1e-7
 ARROW_SIZE = 1
 DIMENSIONS = 10
 COLORS = ["red", "blue", "green"]

@@ -1,8 +1,12 @@
 from heapq import heappush, heappop
+import numpy as np
 from node import Node
+from typing import Tuple
 
 
-def heuristic_solution(mass, mass_limit, price):
+def heuristic_solution(
+    mass: np.ndarray, mass_limit: float, price: np.ndarray
+) -> Tuple[int, int]:
     max_price = 0
     temp_mass = 0
     nodes = []
