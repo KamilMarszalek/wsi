@@ -5,7 +5,8 @@ from typing import List
 import numpy as np
 import matplotlib.pyplot as plt
 
-FES = 50000
+
+FES = 10000
 FUNCTION = f13
 POPULATION_SIZE = 20
 MUTATION_POWER = 1
@@ -50,20 +51,28 @@ def generate_data():
         data_2["mean"].append(np.mean(values))
         data_2["std"].append(np.std(values))
     df_1 = pd.DataFrame(data_1)
+    df_1["population size"] = df_1["population size"].astype(int)
     name_1 = f"population_{FUNCTION.__name__}.csv"
     df_1.to_csv(name_1, index=False)
     df_2 = pd.DataFrame(data_2)
+    df_2["mutation power"] = df_2["mutation power"].map(
+        lambda x: f"{x:.1f}".replace(".", ",")
+    )
     name_2 = f"mutation_power_{FUNCTION.__name__}.csv"
     df_2.to_csv(name_2, index=False)
 
 
 def format_dataframe(df: pd.DataFrame, decimal_places: int = 2) -> pd.DataFrame:
-    return df.map(lambda x: f"{x:.{decimal_places}f}".replace(".", ","))
+    df["max"] = df["max"].map(lambda x: f"{x:.{decimal_places}f}".replace(".", ","))
+    df["min"] = df["min"].map(lambda x: f"{x:.{decimal_places}f}".replace(".", ","))
+    df["mean"] = df["mean"].map(lambda x: f"{x:.{decimal_places}f}".replace(".", ","))
+    df["std"] = df["std"].map(lambda x: f"{x:.{decimal_places}f}".replace(".", ","))
+    return df
 
 
 def create_table(filename: str, dataframe: pd.DataFrame) -> None:
-    format_dataframe(dataframe)
-    fig, ax = plt.subplots()
+    dataframe = format_dataframe(dataframe)
+    _, ax = plt.subplots()
     ax.axis("off")
     ax.axis("tight")
     ax.table(
