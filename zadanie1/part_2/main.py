@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 # BETA = 1e-18  # f2
 BETA = 1e-9  # f3
 # BETA = 0.03  # booth
-FUNCTION = f1
+FUNCTION = f2
 DIM_1 = 0
 DIM_2 = 1
 
