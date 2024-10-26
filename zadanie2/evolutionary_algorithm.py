@@ -5,7 +5,7 @@ DIMENSIONS = 10
 
 
 def evolutionary_algorithm(function, population_size, mutation_power, fes):
-    counter = 0
+    counter = 1
     population = generate_population(population_size)
     max_iter = fes // population_size
     evaluation = get_eval(population, function)
