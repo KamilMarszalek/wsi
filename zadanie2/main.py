@@ -12,6 +12,7 @@ FUNCTION = f13
 POPULATION_SIZE = 4
 MUTATION_POWER = 1
 POPULATION_SET = [2**n for n in range(10)]
+ITERATION = 100
 
 
 def main() -> None:
@@ -39,7 +40,7 @@ def generate_data() -> None:
     data_2 = {"siła mutacji - σ": [], "max": [], "min": [], "średnia": [], "std": []}
     with ProcessPoolExecutor(max_workers=4) as executor:
         for i in POPULATION_SET:
-            args = [(i, MUTATION_POWER, FES) for _ in range(100)]
+            args = [(i, MUTATION_POWER, FES) for _ in range(ITERATION)]
             values = list(executor.map(run_evolutionary_algorithm, args))
             data_1["rozmiar populacji - μ"].append(i)
             data_1["max"].append(max(values))
@@ -47,9 +48,9 @@ def generate_data() -> None:
             data_1["średnia"].append(np.mean(values))
             data_1["std"].append(np.std(values))
     with ProcessPoolExecutor(max_workers=4) as executor:
-        for i in range(31, 41):
+        for i in range(1, 11):
             mutation_power = i / 10
-            args = [(POPULATION_SIZE, mutation_power, FES) for _ in range(100)]
+            args = [(POPULATION_SIZE, mutation_power, FES) for _ in range(ITERATION)]
             values = list(executor.map(run_evolutionary_algorithm, args))
             data_2["siła mutacji - σ"].append(mutation_power)
             data_2["max"].append(max(values))
