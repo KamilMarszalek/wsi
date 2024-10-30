@@ -37,7 +37,7 @@ def generate_data() -> None:
         "std": [],
     }
     data_2 = {"siła mutacji - σ": [], "max": [], "min": [], "średnia": [], "std": []}
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=4) as executor:
         for i in POPULATION_SET:
             args = [(i, MUTATION_POWER, FES) for _ in range(100)]
             values = list(executor.map(run_evolutionary_algorithm, args))
