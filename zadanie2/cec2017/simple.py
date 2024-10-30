@@ -7,6 +7,7 @@ from . import transforms
 
 import numpy as np
 
+
 def f1(x, rotation=None, shift=None):
     """
     Shifted and Rotated Bent Cigar Function
@@ -26,6 +27,7 @@ def f1(x, rotation=None, shift=None):
     x_transformed = np.matmul(rotation, x - shift)
     return basic.bent_cigar(x_transformed) + 100.0
 
+
 def f2(x, rotation=None, shift=None):
     """
     (Deprecated) Shifted and Rotated Sum of Different Power Function
@@ -37,9 +39,9 @@ def f2(x, rotation=None, shift=None):
         shift (array): Optional shift vector. If None (default), the official
             vector from the benchmark suite will be used.
     """
-    if 'warned' not in f2.__dict__:
+    if "warned" not in f2.__dict__:
         f2.warned = True
-        print('WARNING: f2 has been deprecated from the CEC 2017 benchmark suite')
+        # print('WARNING: f2 has been deprecated from the CEC 2017 benchmark suite')
 
     nx = len(x)
     if rotation is None:
@@ -48,6 +50,7 @@ def f2(x, rotation=None, shift=None):
         shift = transforms.shifts[1][:nx]
     x_transformed = np.matmul(rotation, x - shift)
     return basic.sum_diff_pow(x_transformed) + 200.0
+
 
 def f3(x, rotation=None, shift=None):
     """
@@ -68,6 +71,7 @@ def f3(x, rotation=None, shift=None):
     x_transformed = np.matmul(rotation, x - shift)
     return basic.zakharov(x_transformed) + 300.0
 
+
 def f4(x, rotation=None, shift=None):
     """
     Shifted and Rotated Rosenbrock’s Function
@@ -86,6 +90,7 @@ def f4(x, rotation=None, shift=None):
         shift = transforms.shifts[3][:nx]
     x_transformed = np.matmul(rotation, (x - shift))
     return basic.rosenbrock(x_transformed) + 400.0
+
 
 def f5(x, rotation=None, shift=None):
     """
@@ -106,6 +111,7 @@ def f5(x, rotation=None, shift=None):
     x_transformed = np.matmul(rotation, (x - shift))
     return basic.rastrigin(x_transformed) + 500.0
 
+
 def f6(x, rotation=None, shift=None):
     """
     Shifted and Rotated Schaffer’s F7 Function
@@ -124,6 +130,7 @@ def f6(x, rotation=None, shift=None):
         shift = transforms.shifts[5][:nx]
     x_transformed = np.matmul(rotation, (x - shift))
     return basic.schaffers_f7(x_transformed) + 600.0
+
 
 def f7(x, rotation=None, shift=None):
     """
@@ -144,6 +151,7 @@ def f7(x, rotation=None, shift=None):
     # pass the shift and rotation directly to the function
     return basic.lunacek_bi_rastrigin(x, shift, rotation) + 700.0
 
+
 def f8(x, rotation=None, shift=None):
     """
     Shifted and Rotated Non-Continuous Rastrigin’s Function
@@ -162,6 +170,7 @@ def f8(x, rotation=None, shift=None):
         shift = transforms.shifts[7][:nx]
     # pass the shift and rotation directly to the function
     return basic.non_cont_rastrigin(x, shift, rotation) + 800.0
+
 
 def f9(x, rotation=None, shift=None):
     """
@@ -182,6 +191,7 @@ def f9(x, rotation=None, shift=None):
     x_transformed = np.matmul(rotation, (x - shift))
     return basic.levy(x_transformed) + 900.0
 
+
 def f10(x, rotation=None, shift=None):
     """
     Shifted and Rotated Schwefel’s Function
@@ -201,15 +211,5 @@ def f10(x, rotation=None, shift=None):
     x_transformed = np.matmul(rotation, (x - shift))
     return basic.modified_schwefel(x_transformed) + 1000.0
 
-all_functions = [
-    f1,
-    f2,
-    f3,
-    f4,
-    f5,
-    f6,
-    f7,
-    f8,
-    f9,
-    f10
-]
+
+all_functions = [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10]
