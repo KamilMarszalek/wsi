@@ -1,10 +1,16 @@
 import numpy as np
+from typing import Callable, Tuple
 
 LIMIT = 100
 DIMENSIONS = 10
 
 
-def evolutionary_algorithm(function, population_size, mutation_power, fes):
+def evolutionary_algorithm(
+    function: Callable[[np.ndarray], float],
+    population_size: int,
+    mutation_power: float,
+    fes: int,
+) -> Tuple[np.ndarray, float]:
     counter = 1
     population = generate_population(population_size)
     max_iter = fes // population_size
@@ -24,11 +30,13 @@ def evolutionary_algorithm(function, population_size, mutation_power, fes):
     return best_point, best_value
 
 
-def generate_population(population_size):
+def generate_population(population_size: int) -> np.ndarray:
     return np.random.uniform(-LIMIT, LIMIT, (population_size, DIMENSIONS))
 
 
-def reproduction(population, evaluation, population_size):
+def reproduction(
+    population: np.ndarray, evaluation: np.ndarray, population_size: int
+) -> np.ndarray:
     rng = np.random.default_rng()
     indices = rng.integers(0, population_size, size=(population_size, 2))
     selected = np.where(
@@ -39,21 +47,25 @@ def reproduction(population, evaluation, population_size):
     return population[selected]
 
 
-def mutation(reproduction, mutation_power):
+def mutation(reproduction: np.ndarray, mutation_power: float) -> np.ndarray:
     mutation = reproduction - mutation_power * np.random.uniform(
         -1, 1, reproduction.shape
     )
     return np.clip(mutation, -LIMIT, LIMIT)
 
 
-def stop(counter, max_iter):
+def stop(counter: int, max_iter: int) -> bool:
     return counter >= max_iter
 
 
-def get_eval(population, function):
+def get_eval(
+    population: np.ndarray, function: Callable[[np.ndarray], float]
+) -> np.ndarray:
     return np.apply_along_axis(function, 1, population)
 
 
-def find_best(population, evaluation):
+def find_best(
+    population: np.ndarray, evaluation: np.ndarray
+) -> Tuple[np.ndarray, float]:
     best_index = np.argmin(evaluation)
     return population[best_index], evaluation[best_index]
