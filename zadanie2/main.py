@@ -1,10 +1,10 @@
 from cec2017.functions import f2, f13
 from evolutionary_algorithm import evolutionary_algorithm
 import pandas as pd
-from typing import List
 import numpy as np
 import matplotlib.pyplot as plt
 from concurrent.futures import ProcessPoolExecutor
+from typing import Tuple
 
 
 FES = 50000
@@ -14,27 +14,21 @@ MUTATION_POWER = 1
 POPULATION_SET = [2**n for n in range(10)]
 
 
-def main():
-    result_dict = {}
-    for _ in range(200):
-        best_point, best_value = evolutionary_algorithm(
-            FUNCTION, POPULATION_SIZE, MUTATION_POWER, FES
-        )
-        result_dict[best_value] = best_point
-        # print("Optimum: ", best_point)
-        # print("Value: ", best_value)
-    min_value = min(result_dict.keys())
-    print("Min value: ", min_value)
-    print(result_dict.get(min_value))
+def main() -> None:
+    generate_data()
+    df_1 = pd.read_csv(f"population_{FUNCTION.__name__}.csv")
+    df_2 = pd.read_csv(f"mutation_power_{FUNCTION.__name__}.csv")
+    create_table(f"population_{FUNCTION.__name__}", df_1)
+    create_table(f"mutation_power_{FUNCTION.__name__}", df_2)
 
 
-def run_evolutionary_algorithm(args):
+def run_evolutionary_algorithm(args: Tuple[int, float, int]) -> float:
     population_size, mutation_power, fes = args
     _, value = evolutionary_algorithm(FUNCTION, population_size, mutation_power, fes)
     return value
 
 
-def generate_data():
+def generate_data() -> None:
     data_1 = {
         "rozmiar populacji - μ": [],
         "max": [],
@@ -102,8 +96,4 @@ def create_table(filename: str, dataframe: pd.DataFrame) -> None:
 
 
 if __name__ == "__main__":
-    generate_data()
-    df_1 = pd.read_csv(f"population_{FUNCTION.__name__}.csv")
-    df_2 = pd.read_csv(f"mutation_power_{FUNCTION.__name__}.csv")
-    create_table(f"population_{FUNCTION.__name__}", df_1)
-    create_table(f"mutation_power_{FUNCTION.__name__}", df_2)
+    main()
