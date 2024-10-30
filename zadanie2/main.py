@@ -8,7 +8,7 @@ from typing import Tuple
 
 
 FES = 50000
-FUNCTION = f13
+FUNCTION = f2
 POPULATION_SIZE = 4
 MUTATION_POWER = 1
 POPULATION_SET = [2**n for n in range(10)]
