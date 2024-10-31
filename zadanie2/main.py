@@ -8,9 +8,9 @@ from typing import Tuple
 
 
 FES = 50000
-FUNCTION = f2
-POPULATION_SIZE = 4
-MUTATION_POWER = 1
+FUNCTION = f13
+POPULATION_SIZE = 16
+MUTATION_POWER = 0.2
 POPULATION_SET = [2**n for n in range(10)]
 ITERATION = 100
 
@@ -48,7 +48,7 @@ def generate_data() -> None:
             data_1["średnia"].append(np.mean(values))
             data_1["std"].append(np.std(values))
     with ProcessPoolExecutor(max_workers=4) as executor:
-        for i in range(1, 11):
+        for i in range(2, 11, 2):
             mutation_power = i / 10
             args = [(POPULATION_SIZE, mutation_power, FES) for _ in range(ITERATION)]
             values = list(executor.map(run_evolutionary_algorithm, args))

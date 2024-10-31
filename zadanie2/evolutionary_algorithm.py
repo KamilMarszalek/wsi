@@ -48,8 +48,8 @@ def reproduction(
 
 
 def mutation(reproduction: np.ndarray, mutation_power: float) -> np.ndarray:
-    mutation = reproduction + mutation_power * np.random.uniform(
-        -1, 1, reproduction.shape
+    mutation = reproduction + mutation_power * np.random.normal(
+        0, 1, reproduction.shape
     )
     return np.clip(mutation, -LIMIT, LIMIT)
 
