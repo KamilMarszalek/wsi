@@ -9,18 +9,34 @@ from typing import Tuple
 
 FES = 50000
 FUNCTION = f13
-POPULATION_SIZE = 16
+POPULATION_SIZE = 8
 MUTATION_POWER = 0.2
 POPULATION_SET = [2**n for n in range(10)]
-ITERATION = 100
+ITERATION = 500
 
 
 def main() -> None:
-    generate_data()
-    df_1 = pd.read_csv(f"population_{FUNCTION.__name__}.csv")
-    df_2 = pd.read_csv(f"mutation_power_{FUNCTION.__name__}.csv")
-    create_table(f"population_{FUNCTION.__name__}", df_1)
-    create_table(f"mutation_power_{FUNCTION.__name__}", df_2)
+    # generate_data()
+    # df_1 = pd.read_csv(f"population_{FUNCTION.__name__}.csv")
+    # df_2 = pd.read_csv(f"mutation_power_{FUNCTION.__name__}.csv")
+    # create_table(f"population_{FUNCTION.__name__}", df_1)
+    # create_table(f"mutation_power_{FUNCTION.__name__}", df_2)
+    analyze_best_case()
+    df_3 = pd.read_csv(f"best_case_{FUNCTION.__name__}.csv")
+    create_table(f"best_case_{FUNCTION.__name__}", df_3)
+
+
+def analyze_best_case() -> None:
+    data = {"max": [], "min": [], "średnia": [], "std": []}
+    with ProcessPoolExecutor(max_workers=4) as executor:
+        args = [(POPULATION_SIZE, MUTATION_POWER, FES) for _ in range(ITERATION)]
+        values = list(executor.map(run_evolutionary_algorithm, args))
+    data["max"].append(np.max(values))
+    data["min"].append(np.min(values))
+    data["średnia"].append(np.mean(values))
+    data["std"].append(np.std(values))
+    df = pd.DataFrame(data)
+    df.to_csv(f"best_case_{FUNCTION.__name__}.csv", index=False)
 
 
 def run_evolutionary_algorithm(args: Tuple[int, float, int]) -> float:
@@ -30,23 +46,23 @@ def run_evolutionary_algorithm(args: Tuple[int, float, int]) -> float:
 
 
 def generate_data() -> None:
-    data_1 = {
-        "rozmiar populacji - μ": [],
-        "max": [],
-        "min": [],
-        "średnia": [],
-        "std": [],
-    }
+    # data_1 = {
+    #     "rozmiar populacji - μ": [],
+    #     "max": [],
+    #     "min": [],
+    #     "średnia": [],
+    #     "std": [],
+    # }
     data_2 = {"siła mutacji - σ": [], "max": [], "min": [], "średnia": [], "std": []}
-    with ProcessPoolExecutor(max_workers=4) as executor:
-        for i in POPULATION_SET:
-            args = [(i, MUTATION_POWER, FES) for _ in range(ITERATION)]
-            values = list(executor.map(run_evolutionary_algorithm, args))
-            data_1["rozmiar populacji - μ"].append(i)
-            data_1["max"].append(max(values))
-            data_1["min"].append(min(values))
-            data_1["średnia"].append(np.mean(values))
-            data_1["std"].append(np.std(values))
+    # with ProcessPoolExecutor(max_workers=4) as executor:
+    #     for i in POPULATION_SET:
+    #         args = [(i, MUTATION_POWER, FES) for _ in range(ITERATION)]
+    #         values = list(executor.map(run_evolutionary_algorithm, args))
+    #         data_1["rozmiar populacji - μ"].append(i)
+    #         data_1["max"].append(max(values))
+    #         data_1["min"].append(min(values))
+    #         data_1["średnia"].append(np.mean(values))
+    #         data_1["std"].append(np.std(values))
     with ProcessPoolExecutor(max_workers=4) as executor:
         for i in range(2, 11, 2):
             mutation_power = i / 10
@@ -58,10 +74,10 @@ def generate_data() -> None:
             data_2["średnia"].append(np.mean(values))
             data_2["std"].append(np.std(values))
 
-    df_1 = pd.DataFrame(data_1)
-    df_1["rozmiar populacji - μ"] = df_1["rozmiar populacji - μ"].astype(int)
-    name_1 = f"population_{FUNCTION.__name__}.csv"
-    df_1.to_csv(name_1, index=False)
+    # df_1 = pd.DataFrame(data_1)
+    # df_1["rozmiar populacji - μ"] = df_1["rozmiar populacji - μ"].astype(int)
+    # name_1 = f"population_{FUNCTION.__name__}.csv"
+    # df_1.to_csv(name_1, index=False)
 
     df_2 = pd.DataFrame(data_2)
     df_2["siła mutacji - σ"] = df_2["siła mutacji - σ"].map(
