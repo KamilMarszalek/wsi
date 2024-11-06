@@ -20,9 +20,9 @@ def evolutionary_algorithm(
         reproduction_result = reproduction(population, evaluation, population_size)
         mutation_result = mutation(reproduction_result, mutation_power)
         mutation_evaluation = get_eval(mutation_result, function)
-        best_point_m, value_m = find_best(mutation_result, mutation_evaluation)
-        if value_m < best_value:
-            best_value = value_m
+        best_point_m, best_value_m = find_best(mutation_result, mutation_evaluation)
+        if best_value_m < best_value:
+            best_value = best_value_m
             best_point = best_point_m
         population = mutation_result
         evaluation = mutation_evaluation
@@ -37,8 +37,7 @@ def generate_population(population_size: int) -> np.ndarray:
 def reproduction(
     population: np.ndarray, evaluation: np.ndarray, population_size: int
 ) -> np.ndarray:
-    rng = np.random.default_rng()
-    indices = rng.integers(0, population_size, size=(population_size, 2))
+    indices = np.random.randint(0, population_size, size=(population_size, 2))
     selected = np.where(
         evaluation[indices[:, 0]] < evaluation[indices[:, 1]],
         indices[:, 0],
