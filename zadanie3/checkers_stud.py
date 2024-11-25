@@ -74,57 +74,58 @@ def basic_ev_func(board: "Board", is_black_turn):
 
 
 # nagrody jak w wersji podstawowej + nagroda za stopień zwartości grupy
-def group_prize_ev_func(board, is_black_turn):
+def group_prize_ev_func(board: "Board", is_black_turn: bool) -> int:
     h = 0
-    # ToDo
     if board.white_fig_left == 0:
         return -WON_PRIZE
     if board.black_fig_left == 0:
         return WON_PRIZE
     for row in range(len(board.board)):
         for col in range(len(board.board[row])):
-            if board.board[row][col].is_white():
-                if board.board[row][col].is_king():
+            piece = board.board[row][col]
+            if piece.is_white():
+                if piece.is_king():
                     h += 10
-                    if any(
-                        0 <= row + i < len(board.board)
-                        and 0 <= col + j < len(board.board[row])
-                        and board.board[row + i][col + j].is_white()
-                        for i in range(-1, 2, 2)
-                        for j in range(-1, 2, 2)
-                    ):
-                        h += 1
                 else:
                     h += 1
-                    if any(
-                        0 <= row + i < len(board.board)
-                        and 0 <= col + j < len(board.board[row])
-                        and board.board[row + i][col + j].is_white()
-                        for i in range(-1, 2, 2)
-                        for j in range(-1, 2, 2)
-                    ):
-                        h += 1
-            elif board.board[row][col].is_black():
-                if board.board[row][col].is_king():
+                neighbors = sum(
+                    1
+                    for i in range(-1, 2, 2)
+                    for j in range(-1, 2, 2)
+                    if 0 <= row + i < len(board.board)
+                    and 0 <= col + j < len(board.board[row])
+                    and board.board[row + i][col + j].is_white()
+                )
+                h += neighbors
+                if (
+                    col == 0
+                    or col == len(board.board[row]) - 1
+                    or row == 0
+                    or row == len(board.board) - 1
+                ):
+                    h += 1
+
+            elif piece.is_black():
+                if piece.is_king():
                     h -= 10
-                    if any(
-                        0 <= row + i < len(board.board)
-                        and 0 <= col + j < len(board.board[row])
-                        and board.board[row + i][col + j].is_black()
-                        for i in range(-1, 2, 2)
-                        for j in range(-1, 2, 2)
-                    ):
-                        h -= 1
                 else:
                     h -= 1
-                    if any(
-                        0 <= row + i < len(board.board)
-                        and 0 <= col + j < len(board.board[row])
-                        and board.board[row + i][col + j].is_black()
-                        for i in range(-1, 2, 2)
-                        for j in range(-1, 2, 2)
-                    ):
-                        h -= 1
+                neighbors = sum(
+                    1
+                    for i in range(-1, 2, 2)
+                    for j in range(-1, 2, 2)
+                    if 0 <= row + i < len(board.board)
+                    and 0 <= col + j < len(board.board[row])
+                    and board.board[row + i][col + j].is_black()
+                )
+                h -= neighbors
+                if (
+                    col == 0
+                    or col == len(board.board[row]) - 1
+                    or row == 0
+                    or row == len(board.board) - 1
+                ):
+                    h -= 1
     return h
 
 
@@ -142,7 +143,7 @@ def push_to_opp_half_ev_func(board, is_black_turn):
                 if board.board[row][col].is_king():
                     h += 10
                 else:
-                    if row < len(board.board) / 2:
+                    if row > len(board.board) / 2:
                         h += 5
                     else:
                         h += 7
@@ -150,7 +151,7 @@ def push_to_opp_half_ev_func(board, is_black_turn):
                 if board.board[row][col].is_king():
                     h -= 10
                 else:
-                    if row > len(board.board) / 2:
+                    if row < len(board.board) / 2:
                         h -= 5
                     else:
                         h -= 7
@@ -161,6 +162,22 @@ def push_to_opp_half_ev_func(board, is_black_turn):
 def push_forward_ev_func(board, is_black_turn):
     h = 0
     # ToDo
+    if board.white_fig_left == 0:
+        return -WON_PRIZE
+    if board.black_fig_left == 0:
+        return WON_PRIZE
+    for row in range(len(board.board)):
+        for col in range(len(board.board[row])):
+            if board.board[row][col].is_white():
+                if board.board[row][col].is_king():
+                    h += 10
+                else:
+                    h += 5 + (8 - (row + 1))
+            elif board.board[row][col].is_black():
+                if board.board[row][col].is_king():
+                    h -= 10
+                else:
+                    h -= 5 + row + 1
     return h
 
 
@@ -168,8 +185,9 @@ def push_forward_ev_func(board, is_black_turn):
 def minimax_a_b(board, depth, plays_as_black, ev_func):
     possible_moves = board.get_possible_moves(plays_as_black)
     if len(possible_moves) == 0:
-        return ev_func(board, not plays_as_black)
-
+        board.white_won = plays_as_black
+        board.is_running = False
+        return None
     a = -np.inf
     b = np.inf
     moves_marks = []
@@ -191,31 +209,28 @@ def minimax_a_b_recurr(board, depth, move_max, a, b, ev_func):
     if not possible_moves:
         return ev_func(board, not move_max)
     if move_max:
-        value = -np.inf
         for move in possible_moves:
             board_copy = deepcopy(board)
             board_copy.make_move(move)
-            value = max(
-                value,
+            a = max(
+                a,
                 minimax_a_b_recurr(board_copy, depth - 1, not move_max, a, b, ev_func),
             )
-            a = max(a, value)
             if a >= b:
                 return a
-        return value
+        return a
     else:
-        value = np.inf
         for move in possible_moves:
             board_copy = deepcopy(board)
             board_copy.make_move(move)
-            value = min(
-                value,
+            b = min(
+                b,
                 minimax_a_b_recurr(board_copy, depth - 1, not move_max, a, b, ev_func),
             )
-            b = min(b, value)
             if a >= b:
                 return b
-        return value
+        # return value
+        return b
 
 
 class Move:
@@ -683,9 +698,11 @@ def main():
         clock.tick(FPS)
 
         if not game.board.white_turn:
-            # move = minimax_a_b( game.board, MINIMAX_DEPTH, True, basic_ev_func)
-            # move = minimax_a_b( game.board, MINIMAX_DEPTH, True, push_forward_ev_func)
-            move = minimax_a_b( game.board, MINIMAX_DEPTH, True, push_to_opp_half_ev_func)
+            move = minimax_a_b( game.board, MINIMAX_DEPTH, True, basic_ev_func)
+            # move = minimax_a_b(game.board, MINIMAX_DEPTH, True, push_forward_ev_func)
+            # move = minimax_a_b(
+            #     game.board, MINIMAX_DEPTH, True, push_to_opp_half_ev_func
+            # )
             # move = minimax_a_b(game.board, MINIMAX_DEPTH, True, group_prize_ev_func)
 
             if move is not None:
@@ -714,12 +731,12 @@ def ai_vs_ai():
 
     while is_running:
         if board.white_turn:
-            move = minimax_a_b(board, 5, not board.white_turn, basic_ev_func)
+            move = minimax_a_b(board, 2, not board.white_turn, basic_ev_func)
         else:
-            move = minimax_a_b(board, 5, not board.white_turn, basic_ev_func)
-            # move = minimax_a_b( board, 5, not board.white_turn, push_forward_ev_func)
+            move = minimax_a_b(board, 2, not board.white_turn, basic_ev_func)
+            # move = minimax_a_b(board, 10, not board.white_turn, push_forward_ev_func)
             # move = minimax_a_b( board, 5, not board.white_turn, push_to_opp_half_ev_func)
-            # move = minimax_a_b( board, 5, not board.white_turn, group_prize_ev_func)
+            # move = minimax_a_b(board, 5, not board.white_turn, group_prize_ev_func)
 
         if move is not None:
             board.register_move(move)
@@ -737,5 +754,5 @@ def ai_vs_ai():
     # if both won then it is a draw!
 
 
-main()
-# ai_vs_ai()
+# main()
+ai_vs_ai()
