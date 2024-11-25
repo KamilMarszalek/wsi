@@ -18,6 +18,8 @@ Chętni mogą ulepszać mój kod (trzeba oznaczyć komentarzem co zostało zmien
 import numpy as np
 import pygame
 from copy import deepcopy
+import pandas as pd
+import multiprocessing as mp
 
 FPS = 20
 
@@ -54,8 +56,8 @@ def basic_ev_func(board: "Board", is_black_turn):
         return -WON_PRIZE
     if board.black_fig_left == 0:
         return WON_PRIZE
-    for row in range(len(board.board)):
-        for col in range(len(board.board[row])):
+    for row in range(BOARD_WIDTH):
+        for col in range((row + 1) % 2, BOARD_WIDTH, 2):
             if board.board[row][col].is_white():
                 if board.board[row][col].is_king():
                     h += 10
@@ -80,8 +82,8 @@ def group_prize_ev_func(board: "Board", is_black_turn: bool) -> int:
         return -WON_PRIZE
     if board.black_fig_left == 0:
         return WON_PRIZE
-    for row in range(len(board.board)):
-        for col in range(len(board.board[row])):
+    for row in range(BOARD_WIDTH):
+        for col in range((row + 1) % 2, BOARD_WIDTH, 2):
             piece = board.board[row][col]
             if piece.is_white():
                 if piece.is_king():
@@ -137,8 +139,8 @@ def push_to_opp_half_ev_func(board, is_black_turn):
         return -WON_PRIZE
     if board.black_fig_left == 0:
         return WON_PRIZE
-    for row in range(len(board.board)):
-        for col in range(len(board.board[row])):
+    for row in range(BOARD_WIDTH):
+        for col in range((row + 1) % 2, BOARD_WIDTH, 2):
             if board.board[row][col].is_white():
                 if board.board[row][col].is_king():
                     h += 10
@@ -166,18 +168,18 @@ def push_forward_ev_func(board, is_black_turn):
         return -WON_PRIZE
     if board.black_fig_left == 0:
         return WON_PRIZE
-    for row in range(len(board.board)):
-        for col in range(len(board.board[row])):
+    for row in range(BOARD_WIDTH):
+        for col in range((row + 1) % 2, BOARD_WIDTH, 2):
             if board.board[row][col].is_white():
                 if board.board[row][col].is_king():
                     h += 10
                 else:
-                    h += 5 + (8 - (row + 1))
+                    h += 5 + (8 - row - 1)
             elif board.board[row][col].is_black():
                 if board.board[row][col].is_king():
                     h -= 10
                 else:
-                    h -= 5 + row + 1
+                    h -= 5 + row
     return h
 
 
@@ -196,8 +198,8 @@ def minimax_a_b(board, depth, plays_as_black, ev_func):
         board_copy = deepcopy(board)
         ev = minimax_a_b_recurr(board_copy, depth, plays_as_black, a, b, ev_func)
         moves_marks.append(ev)
-    best_index = np.argmax(moves_marks) if plays_as_black else np.argmin(moves_marks)
-    return possible_moves[best_index]
+    best_indices = np.where(moves_marks == np.max(moves_marks))[0]
+    return possible_moves[np.random.choice(best_indices)]
 
 
 # recursive function, called from minimax_a_b
@@ -698,7 +700,7 @@ def main():
         clock.tick(FPS)
 
         if not game.board.white_turn:
-            move = minimax_a_b( game.board, MINIMAX_DEPTH, True, basic_ev_func)
+            move = minimax_a_b(game.board, MINIMAX_DEPTH, True, basic_ev_func)
             # move = minimax_a_b(game.board, MINIMAX_DEPTH, True, push_forward_ev_func)
             # move = minimax_a_b(
             #     game.board, MINIMAX_DEPTH, True, push_to_opp_half_ev_func
@@ -725,17 +727,22 @@ def main():
     pygame.quit()
 
 
-def ai_vs_ai():
+def ai_vs_ai(ev_func, depth):
     board = Board()
     is_running = True
 
     while is_running:
         if board.white_turn:
-            move = minimax_a_b(board, 2, not board.white_turn, basic_ev_func)
-        else:
-            move = minimax_a_b(board, 2, not board.white_turn, basic_ev_func)
-            # move = minimax_a_b(board, 10, not board.white_turn, push_forward_ev_func)
+            move = minimax_a_b(board, depth, not board.white_turn, ev_func)
+            # move = minimax_a_b(board, 4, not board.white_turn, basic_ev_func)
+            # move = minimax_a_b(board, 4, not board.white_turn, push_forward_ev_func)
             # move = minimax_a_b( board, 5, not board.white_turn, push_to_opp_half_ev_func)
+            # move = minimax_a_b(board, 5, not board.white_turn, group_prize_ev_func)
+        else:
+            move = minimax_a_b(board, depth, not board.white_turn, ev_func)
+            # move = minimax_a_b(board, 4, not board.white_turn, basic_ev_func)
+            # move = minimax_a_b(board, 10, not board.white_turn, push_forward_ev_func)
+            # move = minimax_a_b(board, 4, not board.white_turn, push_to_opp_half_ev_func)
             # move = minimax_a_b(board, 5, not board.white_turn, group_prize_ev_func)
 
         if move is not None:
@@ -752,7 +759,64 @@ def ai_vs_ai():
     print("black_won:", board.black_won)
     print("white_won:", board.white_won)
     # if both won then it is a draw!
+    return board.black_won, board.white_won
 
 
 # main()
-ai_vs_ai()
+# ai_vs_ai()
+
+
+def ai_vs_ai_wrapper(args):
+    ev_func, depth = args
+    return ai_vs_ai(ev_func, depth)
+
+
+def experiment():
+    data = {
+        "depth": [],
+        "basic_ev_func_wins": [],
+        "basic_ev_func_draws": [],
+        "basic_ev_func_losses": [],
+        "group_prize_ev_func_wins": [],
+        "group_prize_ev_func_draws": [],
+        "group_prize_ev_func_losses": [],
+        "push_to_opp_half_ev_func_wins": [],
+        "push_to_opp_half_ev_func_draws": [],
+        "push_to_opp_half_ev_func_losses": [],
+        "push_forward_ev_func_wins": [],
+        "push_forward_ev_func_draws": [],
+        "push_forward_ev_func_losses": [],
+    }
+
+    ev_funcs = [
+        ("basic_ev_func", basic_ev_func),
+        ("group_prize_ev_func", group_prize_ev_func),
+        ("push_to_opp_half_ev_func", push_to_opp_half_ev_func),
+        ("push_forward_ev_func", push_forward_ev_func),
+    ]
+
+    depths = range(3, 8)
+
+    with mp.Pool(processes=mp.cpu_count()) as pool:
+        for depth in depths:
+            for ev_func_name, ev_func in ev_funcs:
+                results = pool.map(
+                    ai_vs_ai_wrapper, [(ev_func, depth) for _ in range(50)]
+                )
+                white_win, draws, black_win = 0, 0, 0
+                for black, white in results:
+                    if black and white:
+                        draws += 1
+                    elif black:
+                        black_win += 1
+                    elif white:
+                        white_win += 1
+                data["depth"].append(depth)
+                data[f"{ev_func_name}_wins"].append(white_win)
+                data[f"{ev_func_name}_draws"].append(draws)
+                data[f"{ev_func_name}_losses"].append(black_win)
+
+    pd.DataFrame(data).to_csv("experiment_results.csv")
+
+
+experiment()
