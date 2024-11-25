@@ -49,8 +49,10 @@ KING_MARK_COL = (255, 215, 0)
 
 
 # count difference between the number of pieces, king+10
-def basic_ev_func(board: "Board", is_black_turn):
+def basic_ev_func(board: "Board", is_black_turn: bool) -> int:
     h = 0
+    pawn = 1
+    king = 10
     # ToDo funkcja liczy i zwraca ocene aktualnego stanu planszy
     if board.white_fig_left == 0:
         return -WON_PRIZE
@@ -60,14 +62,14 @@ def basic_ev_func(board: "Board", is_black_turn):
         for col in range((row + 1) % 2, BOARD_WIDTH, 2):
             if board.board[row][col].is_white():
                 if board.board[row][col].is_king():
-                    h += 10
+                    h += king
                 else:
-                    h += 1
+                    h += pawn
             elif board.board[row][col].is_black():
                 if board.board[row][col].is_king():
-                    h -= 10
+                    h -= king
                 else:
-                    h -= 1
+                    h -= pawn
     # board.board[row][col].is_black() - sprawdza czy to czarny kolor figury
     # board.board[row][col].is_white() - sprawdza czy to biały kolor figury
     # board.board[row][col].is_king() - sprawdza czy to damka
@@ -78,6 +80,10 @@ def basic_ev_func(board: "Board", is_black_turn):
 # nagrody jak w wersji podstawowej + nagroda za stopień zwartości grupy
 def group_prize_ev_func(board: "Board", is_black_turn: bool) -> int:
     h = 0
+    pawn = 1
+    king = 10
+    neighbour = 1
+    edge = 1
     if board.white_fig_left == 0:
         return -WON_PRIZE
     if board.black_fig_left == 0:
@@ -87,11 +93,11 @@ def group_prize_ev_func(board: "Board", is_black_turn: bool) -> int:
             piece = board.board[row][col]
             if piece.is_white():
                 if piece.is_king():
-                    h += 10
+                    h += king
                 else:
-                    h += 1
+                    h += pawn
                 neighbors = sum(
-                    1
+                    neighbour
                     for i in range(-1, 2, 2)
                     for j in range(-1, 2, 2)
                     if 0 <= row + i < len(board.board)
@@ -105,15 +111,15 @@ def group_prize_ev_func(board: "Board", is_black_turn: bool) -> int:
                     or row == 0
                     or row == len(board.board) - 1
                 ):
-                    h += 1
+                    h += edge
 
             elif piece.is_black():
                 if piece.is_king():
-                    h -= 10
+                    h -= king
                 else:
-                    h -= 1
+                    h -= pawn
                 neighbors = sum(
-                    1
+                    neighbour
                     for i in range(-1, 2, 2)
                     for j in range(-1, 2, 2)
                     if 0 <= row + i < len(board.board)
@@ -127,13 +133,16 @@ def group_prize_ev_func(board: "Board", is_black_turn: bool) -> int:
                     or row == 0
                     or row == len(board.board) - 1
                 ):
-                    h -= 1
+                    h -= edge
     return h
 
 
 # za każdy pion na własnej połowie planszy otrzymuje się 5 nagrody, na połowie przeciwnika 7, a za każdą damkę 10.
-def push_to_opp_half_ev_func(board, is_black_turn):
+def push_to_opp_half_ev_func(board: "Board", is_black_turn: bool) -> int:
     h = 0
+    king = 10
+    own_half = 5
+    opp_half = 7
     # ToDo
     if board.white_fig_left == 0:
         return -WON_PRIZE
@@ -143,26 +152,28 @@ def push_to_opp_half_ev_func(board, is_black_turn):
         for col in range((row + 1) % 2, BOARD_WIDTH, 2):
             if board.board[row][col].is_white():
                 if board.board[row][col].is_king():
-                    h += 10
+                    h += king
                 else:
-                    if row > len(board.board) / 2:
-                        h += 5
+                    if row >= len(board.board) / 2:
+                        h += own_half
                     else:
-                        h += 7
+                        h += opp_half
             elif board.board[row][col].is_black():
                 if board.board[row][col].is_king():
-                    h -= 10
+                    h -= king
                 else:
                     if row < len(board.board) / 2:
-                        h -= 5
+                        h -= own_half
                     else:
-                        h -= 7
+                        h -= opp_half
     return h
 
 
 # za każdy nasz pion otrzymuje się nagrodę w wysokości: (5 + numer wiersza, na którym stoi pion) (im jest bliżej wroga tym lepiej), a za każdą damkę dodtakowe: 10.
-def push_forward_ev_func(board, is_black_turn):
+def push_forward_ev_func(board: "Board", is_black_turn: bool) -> int:
     h = 0
+    king = 10
+    pawn = 5
     # ToDo
     if board.white_fig_left == 0:
         return -WON_PRIZE
@@ -172,14 +183,14 @@ def push_forward_ev_func(board, is_black_turn):
         for col in range((row + 1) % 2, BOARD_WIDTH, 2):
             if board.board[row][col].is_white():
                 if board.board[row][col].is_king():
-                    h += 10
+                    h += king
                 else:
-                    h += 5 + (8 - row - 1)
+                    h += pawn + (BOARD_WIDTH - row - 1)
             elif board.board[row][col].is_black():
                 if board.board[row][col].is_king():
-                    h -= 10
+                    h -= king
                 else:
-                    h -= 5 + row
+                    h -= pawn + row
     return h
 
 
@@ -203,7 +214,7 @@ def minimax_a_b(board, depth, plays_as_black, ev_func):
 
 
 # recursive function, called from minimax_a_b
-def minimax_a_b_recurr(board, depth, move_max, a, b, ev_func):
+def minimax_a_b_recurr(board: "Board", depth: int, move_max: bool, a: float, b: float, ev_func: callable) -> float:
     # ToDo
     if depth == 0 or board.white_fig_left == 0 or board.black_fig_left == 0:
         return ev_func(board, move_max)
