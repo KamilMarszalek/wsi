@@ -207,22 +207,34 @@ def minimax_a_b(board: "Board", depth: int, plays_as_black: bool, ev_func: calla
     for possible_move in possible_moves:
         # ToDo
         board_copy = deepcopy(board)
-        ev = minimax_a_b_recurr(board_copy, depth, not plays_as_black, a, b, ev_func)
+        ev = minimax_a_b_recurr(
+            board_copy, depth, not plays_as_black, a, b, ev_func, [possible_move]
+        )
         moves_marks.append(ev)
-    best_indices = np.where(moves_marks == np.max(moves_marks))[0]
+    if not plays_as_black:
+        best_indices = np.where(moves_marks == np.max(moves_marks))[0]
+    else:
+        best_indices = np.where(moves_marks == np.min(moves_marks))[0]
     return possible_moves[np.random.choice(best_indices)]
 
 
 # recursive function, called from minimax_a_b
 def minimax_a_b_recurr(
-    board: "Board", depth: int, move_max: bool, a: float, b: float, ev_func: callable
+    board: "Board",
+    depth: int,
+    move_max: bool,
+    a: float,
+    b: float,
+    ev_func: callable,
+    possible_moves: list["Move"] = None,
 ) -> float:
     # ToDo
-    if depth == 0 or board.white_fig_left == 0 or board.black_fig_left == 0:
+    if possible_moves is None:
+        possible_moves = board.get_possible_moves(not move_max)
+
+    if len(possible_moves) == 0 or depth == 0:
         return ev_func(board, not move_max)
-    possible_moves = board.get_possible_moves(not move_max)
-    if len(possible_moves) == 0:
-        return ev_func(board, not move_max)
+
     if move_max:
         for move in possible_moves:
             board_copy = deepcopy(board)
@@ -232,7 +244,7 @@ def minimax_a_b_recurr(
                 minimax_a_b_recurr(board_copy, depth - 1, not move_max, a, b, ev_func),
             )
             if a >= b:
-                return a
+                break
         return a
     else:
         for move in possible_moves:
@@ -243,7 +255,7 @@ def minimax_a_b_recurr(
                 minimax_a_b_recurr(board_copy, depth - 1, not move_max, a, b, ev_func),
             )
             if a >= b:
-                return b
+                break
         # return value
         return b
 
@@ -746,8 +758,10 @@ def ai_vs_ai(ev_func, depth):
 
     while is_running:
         if board.white_turn:
-            move = minimax_a_b(board, depth, not board.white_turn, ev_func)
-            # move = minimax_a_b(board, 4, not board.white_turn, basic_ev_func)
+            # move = minimax_a_b(board, depth, not board.white_turn, ev_func)
+            move = minimax_a_b(
+                board, MINIMAX_DEPTH, not board.white_turn, basic_ev_func
+            )
             # move = minimax_a_b(board, 4, not board.white_turn, push_forward_ev_func)
             # move = minimax_a_b( board, 5, not board.white_turn, push_to_opp_half_ev_func)
             # move = minimax_a_b(board, 5, not board.white_turn, group_prize_ev_func)
@@ -785,22 +799,6 @@ def ai_vs_ai_wrapper(args):
 
 
 def experiment():
-    data = {
-        "depth": [],
-        "basic_ev_func_wins": [],
-        "basic_ev_func_draws": [],
-        "basic_ev_func_losses": [],
-        "group_prize_ev_func_wins": [],
-        "group_prize_ev_func_draws": [],
-        "group_prize_ev_func_losses": [],
-        "push_to_opp_half_ev_func_wins": [],
-        "push_to_opp_half_ev_func_draws": [],
-        "push_to_opp_half_ev_func_losses": [],
-        "push_forward_ev_func_wins": [],
-        "push_forward_ev_func_draws": [],
-        "push_forward_ev_func_losses": [],
-    }
-
     ev_funcs = [
         ("basic_ev_func", basic_ev_func),
         ("group_prize_ev_func", group_prize_ev_func),
@@ -812,24 +810,35 @@ def experiment():
 
     with mp.Pool(processes=mp.cpu_count()) as pool:
         for depth in depths:
+            data = {
+                "ev_func": [],
+                "wins": [],
+                "draws": [],
+                "losses": [],
+            }
             for ev_func_name, ev_func in ev_funcs:
                 results = pool.map(
-                    ai_vs_ai_wrapper, [(ev_func, depth) for _ in range(3)]
+                    ai_vs_ai_wrapper, [(ev_func, depth) for _ in range(25)]
                 )
-                white_win, draws, black_win = 0, 0, 0
+                wins, draws, losses = 0, 0, 0
                 for black, white in results:
                     if black and white:
                         draws += 1
                     elif black:
-                        black_win += 1
+                        losses += 1
                     elif white:
-                        white_win += 1
-                data["depth"].append(depth)
-                data[f"{ev_func_name}_wins"].append(white_win)
-                data[f"{ev_func_name}_draws"].append(draws)
-                data[f"{ev_func_name}_losses"].append(black_win)
+                        wins += 1
+                data["ev_func"].append(ev_func_name)
+                data["wins"].append(wins)
+                data["draws"].append(draws)
+                data["losses"].append(losses)
 
-    pd.DataFrame(data).to_csv("experiment_results.csv")
+            # Save results to a CSV file for the current depth
+            pd.DataFrame(data).to_csv(
+                f"experiment_results_depth_{depth}.csv", index=False
+            )
 
 
-experiment()
+if __name__ == "__main__":
+    experiment()
+    # main()
