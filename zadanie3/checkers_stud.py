@@ -219,10 +219,10 @@ def minimax_a_b_recurr(
 ) -> float:
     # ToDo
     if depth == 0 or board.white_fig_left == 0 or board.black_fig_left == 0:
-        return ev_func(board, move_max)
-    possible_moves = board.get_possible_moves(move_max)
+        return ev_func(board, not move_max)
+    possible_moves = board.get_possible_moves(not move_max)
     if len(possible_moves) == 0:
-        return ev_func(board, move_max)
+        return ev_func(board, not move_max)
     if move_max:
         for move in possible_moves:
             board_copy = deepcopy(board)
@@ -814,7 +814,7 @@ def experiment():
         for depth in depths:
             for ev_func_name, ev_func in ev_funcs:
                 results = pool.map(
-                    ai_vs_ai_wrapper, [(ev_func, depth) for _ in range(1)]
+                    ai_vs_ai_wrapper, [(ev_func, depth) for _ in range(3)]
                 )
                 white_win, draws, black_win = 0, 0, 0
                 for black, white in results:
