@@ -154,7 +154,7 @@ def push_to_opp_half_ev_func(board: "Board", is_black_turn: bool) -> int:
                 if board.board[row][col].is_king():
                     h += king
                 else:
-                    if row >= len(board.board) / 2:
+                    if row >= len(board.board) // 2:
                         h += own_half
                     else:
                         h += opp_half
@@ -162,7 +162,7 @@ def push_to_opp_half_ev_func(board: "Board", is_black_turn: bool) -> int:
                 if board.board[row][col].is_king():
                     h -= king
                 else:
-                    if row < len(board.board) / 2:
+                    if row < len(board.board) // 2:
                         h -= own_half
                     else:
                         h -= opp_half
@@ -195,7 +195,7 @@ def push_forward_ev_func(board: "Board", is_black_turn: bool) -> int:
 
 
 # f. called from main
-def minimax_a_b(board, depth, plays_as_black, ev_func):
+def minimax_a_b(board: "Board", depth: int, plays_as_black: bool, ev_func: callable):
     possible_moves = board.get_possible_moves(plays_as_black)
     if len(possible_moves) == 0:
         board.white_won = plays_as_black
@@ -207,20 +207,22 @@ def minimax_a_b(board, depth, plays_as_black, ev_func):
     for possible_move in possible_moves:
         # ToDo
         board_copy = deepcopy(board)
-        ev = minimax_a_b_recurr(board_copy, depth, plays_as_black, a, b, ev_func)
+        ev = minimax_a_b_recurr(board_copy, depth, not plays_as_black, a, b, ev_func)
         moves_marks.append(ev)
     best_indices = np.where(moves_marks == np.max(moves_marks))[0]
     return possible_moves[np.random.choice(best_indices)]
 
 
 # recursive function, called from minimax_a_b
-def minimax_a_b_recurr(board: "Board", depth: int, move_max: bool, a: float, b: float, ev_func: callable) -> float:
+def minimax_a_b_recurr(
+    board: "Board", depth: int, move_max: bool, a: float, b: float, ev_func: callable
+) -> float:
     # ToDo
     if depth == 0 or board.white_fig_left == 0 or board.black_fig_left == 0:
         return ev_func(board, move_max)
     possible_moves = board.get_possible_moves(move_max)
-    if not possible_moves:
-        return ev_func(board, not move_max)
+    if len(possible_moves) == 0:
+        return ev_func(board, move_max)
     if move_max:
         for move in possible_moves:
             board_copy = deepcopy(board)
@@ -812,7 +814,7 @@ def experiment():
         for depth in depths:
             for ev_func_name, ev_func in ev_funcs:
                 results = pool.map(
-                    ai_vs_ai_wrapper, [(ev_func, depth) for _ in range(50)]
+                    ai_vs_ai_wrapper, [(ev_func, depth) for _ in range(1)]
                 )
                 white_win, draws, black_win = 0, 0, 0
                 for black, white in results:
