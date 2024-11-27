@@ -1,5 +1,5 @@
 ev_func,wins,draws,losses
-basic_ev_func,12,0,13
-group_prize_ev_func,1,11,13
-push_to_opp_half_ev_func,12,0,13
-push_forward_ev_func,11,0,14
+basic_ev_func,4,0,46
+group_prize_ev_func,28,8,14
+push_to_opp_half_ev_func,6,0,44
+push_forward_ev_func,28,0,22

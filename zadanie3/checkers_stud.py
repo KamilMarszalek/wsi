@@ -70,10 +70,6 @@ def basic_ev_func(board: "Board", is_black_turn: bool) -> int:
                     h -= king
                 else:
                     h -= pawn
-    # board.board[row][col].is_black() - sprawdza czy to czarny kolor figury
-    # board.board[row][col].is_white() - sprawdza czy to biały kolor figury
-    # board.board[row][col].is_king() - sprawdza czy to damka
-    # współrzędne zaczynają (0,0) się od lewej od góry
     return h
 
 
@@ -256,7 +252,6 @@ def minimax_a_b_recurr(
             )
             if a >= b:
                 break
-        # return value
         return b
 
 
@@ -542,6 +537,7 @@ class Board:
 
     # detect draws
     def end(self):
+        # changed because in my version of the game white is always max player and black is always min player
         # stop if repeats
         if self.black_repeats and self.white_repeats:
             # who won
@@ -725,11 +721,11 @@ def main():
         clock.tick(FPS)
 
         if not game.board.white_turn:
-            move = minimax_a_b(game.board, MINIMAX_DEPTH, True, basic_ev_func)
+            # move = minimax_a_b(game.board, MINIMAX_DEPTH, True, basic_ev_func)
             # move = minimax_a_b(game.board, MINIMAX_DEPTH, True, push_forward_ev_func)
-            # move = minimax_a_b(
-            #     game.board, MINIMAX_DEPTH, True, push_to_opp_half_ev_func
-            # )
+            move = minimax_a_b(
+                game.board, MINIMAX_DEPTH, True, push_to_opp_half_ev_func
+            )
             # move = minimax_a_b(game.board, MINIMAX_DEPTH, True, group_prize_ev_func)
 
             if move is not None:
@@ -818,7 +814,7 @@ def experiment():
             }
             for ev_func_name, ev_func in ev_funcs:
                 results = pool.map(
-                    ai_vs_ai_wrapper, [(ev_func, depth) for _ in range(25)]
+                    ai_vs_ai_wrapper, [(ev_func, depth) for _ in range(50)]
                 )
                 wins, draws, losses = 0, 0, 0
                 for black, white in results:
@@ -840,5 +836,5 @@ def experiment():
 
 
 if __name__ == "__main__":
-    experiment()
-    # main()
+    # experiment()
+    main()
