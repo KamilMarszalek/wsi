@@ -546,9 +546,9 @@ class Board:
         if self.black_repeats and self.white_repeats:
             # who won
             ev = basic_ev_func(self, not self.white_turn)
-            if ev > 0:
+            if ev < 0:
                 self.black_won = True
-            elif ev < 0:
+            elif ev > 0:
                 self.white_won = True
             else:
                 self.black_won = True
@@ -806,7 +806,7 @@ def experiment():
         ("push_forward_ev_func", push_forward_ev_func),
     ]
 
-    depths = range(3, 8)
+    depths = range(3, 7)
 
     with mp.Pool(processes=mp.cpu_count()) as pool:
         for depth in depths:
