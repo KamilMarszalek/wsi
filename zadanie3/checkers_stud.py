@@ -53,7 +53,6 @@ def basic_ev_func(board: "Board", is_black_turn: bool) -> int:
     h = 0
     pawn = 1
     king = 10
-    # ToDo funkcja liczy i zwraca ocene aktualnego stanu planszy
     if board.white_fig_left == 0:
         return -WON_PRIZE
     if board.black_fig_left == 0:
@@ -201,7 +200,6 @@ def minimax_a_b(board: "Board", depth: int, plays_as_black: bool, ev_func: calla
     b = np.inf
     moves_marks = []
     for possible_move in possible_moves:
-        # ToDo
         board_copy = deepcopy(board)
         ev = minimax_a_b_recurr(
             board_copy, depth, not plays_as_black, a, b, ev_func, [possible_move]
@@ -224,7 +222,7 @@ def minimax_a_b_recurr(
     ev_func: callable,
     possible_moves: list["Move"] = None,
 ) -> float:
-    # ToDo
+    # Added an argument to the function signature to pass the possible moves from minimax_a_b
     if possible_moves is None:
         possible_moves = board.get_possible_moves(not move_max)
 
