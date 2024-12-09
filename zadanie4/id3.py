@@ -10,16 +10,13 @@ class Node:
 
 
 def entropy(targets):
-    # counts = np.bincount(targets)
     counts = Counter(targets).values()
-    # probabilities = counts / len(targets)
     probabilities = [c / len(targets) for c in counts]
     return -np.sum([p * np.log2(p) for p in probabilities if p > 0])
 
 
 def most_common_label(targets):
     targets = [t for t in targets if t is not None]
-    # return np.bincount(targets).argmax()
     if not targets:
         return None
     return Counter(targets).most_common(1)[0][0]
@@ -28,7 +25,7 @@ def most_common_label(targets):
 def build(features, targets):
     if len(set(targets)) == 1:
         return Node(target=targets[0])
-    if len(features) == 0:
+    if len(features) == 0 :
         return Node(target=Counter(targets).most_common(1)[0][0])
 
     current_entropy = entropy(targets)
