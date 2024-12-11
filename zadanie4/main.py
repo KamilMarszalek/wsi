@@ -1,5 +1,7 @@
 from id3 import *
 import pandas as pd
+import numpy as np
+from typing import Tuple
 
 
 DATA_SETS = ["agaricus-lepiota.data", "breast-cancer.data"]
@@ -8,13 +10,13 @@ TRAIN_SIZE = 0.6
 
 
 def test_model(
-    dataset=DATA,
-    train_size=TRAIN_SIZE,
-    class_index=0,
-    begin=1,
-    end=None,
-    row_percentage=1,
-):
+    dataset: str = DATA,
+    train_size: float = TRAIN_SIZE,
+    class_index: int = 0,
+    begin: int = 1,
+    end: Optional[int] = None,
+    row_percentage: float = 1,
+) -> Tuple[float, np.ndarray]:
     data = pd.read_csv(dataset, header=None)
     shuffled_data = data.sample(
         frac=row_percentage, random_state=np.random.randint(0, 10000)

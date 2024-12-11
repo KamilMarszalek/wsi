@@ -1,29 +1,36 @@
 import numpy as np
 from collections import Counter
+from typing import Any, Dict, List, Optional, Union
 
 
 class Node:
-    def __init__(self, attribute=None, target=None, children=None, default_label=None):
+    def __init__(
+        self,
+        attribute: Optional[int] = None,
+        target: Optional[Any] = None,
+        children: Optional[Dict[Any, "Node"]] = None,
+        default_label: Optional[Any] = None,
+    ) -> None:
         self.attribute = attribute
         self.target = target
         self.children = children if children is not None else {}
         self.default_label = default_label
 
 
-def entropy(targets):
+def entropy(targets: List[Any]) -> float:
     counts = Counter(targets).values()
     probabilities = [c / len(targets) for c in counts]
     return -np.sum([p * np.log2(p) for p in probabilities if p > 0])
 
 
-def most_common_label(targets):
+def most_common_label(targets: List[Any]) -> Optional[Any]:
     targets = [t for t in targets if t is not None]
     if not targets:
         return None
     return Counter(targets).most_common(1)[0][0]
 
 
-def build(data, targets, attributes):
+def build(data: np.ndarray, targets: np.ndarray, attributes: List[int]) -> Node:
     if len(set(targets)) == 1:
         return Node(target=targets[0])
     if len(attributes) == 0:
@@ -65,7 +72,7 @@ def build(data, targets, attributes):
     return Node(attribute=best_feature, children=children, default_label=default_label)
 
 
-def predict(tree, data):
+def predict(tree: Node, data: np.ndarray) -> Any:
     if tree.target is not None:
         return tree.target
 
