@@ -3,10 +3,11 @@ from collections import Counter
 
 
 class Node:
-    def __init__(self, feature=None, target=None, children=None):
-        self.feature = feature
+    def __init__(self, attribute=None, target=None, children=None, default_label=None):
+        self.attribute = attribute
         self.target = target
         self.children = children if children is not None else {}
+        self.default_label = default_label
 
 
 def entropy(targets):
@@ -22,24 +23,22 @@ def most_common_label(targets):
     return Counter(targets).most_common(1)[0][0]
 
 
-def build(features, targets):
+def build(data, targets, attributes):
     if len(set(targets)) == 1:
         return Node(target=targets[0])
-    if len(features) == 0 :
-        return Node(target=Counter(targets).most_common(1)[0][0])
+    if len(attributes) == 0:
+        return Node(target=most_common_label(targets))
 
     current_entropy = entropy(targets)
     best_gain = 0
     best_feature = None
     best_splits = None
 
-    n_features = features.shape[1]
-
-    for feature in range(n_features):
-        values = np.unique(features[:, feature])
+    for attribute in attributes:
+        values = np.unique(data[:, attribute])
         splits = {}
         for value in values:
-            subset_indices = features[:, feature] == value
+            subset_indices = data[:, attribute] == value
             splits[value] = targets[subset_indices]
 
         weighted_entropy = sum(
@@ -49,7 +48,7 @@ def build(features, targets):
 
         if gain > best_gain:
             best_gain = gain
-            best_feature = feature
+            best_feature = attribute
             best_splits = splits
 
     if best_gain == 0:
@@ -57,18 +56,20 @@ def build(features, targets):
 
     children = {}
     for value, subset_targets in best_splits.items():
-        subset_features = features[features[:, best_feature] == value]
-        child_node = build(subset_features, subset_targets)
+        subset_data = data[data[:, best_feature] == value]
+        new_attributes = [a for a in attributes if a != best_feature]
+        child_node = build(subset_data, subset_targets, new_attributes)
         children[value] = child_node
 
-    return Node(feature=best_feature, children=children)
+    default_label = most_common_label(targets)
+    return Node(attribute=best_feature, children=children, default_label=default_label)
 
 
-def predict(tree, features):
+def predict(tree, data):
     if tree.target is not None:
         return tree.target
 
-    if features[tree.feature] in tree.children:
-        return predict(tree.children[features[tree.feature]], features)
+    if data[tree.attribute] in tree.children:
+        return predict(tree.children[data[tree.attribute]], data)
     else:
-        return most_common_label([child.target for child in tree.children.values()])
+        return tree.default_label

@@ -3,27 +3,49 @@ import pandas as pd
 
 
 DATA_SETS = ["agaricus-lepiota.data", "breast-cancer.data"]
-DATA = DATA_SETS[1]
+DATA = DATA_SETS[0]
+TRAIN_SIZE = 0.6
 
 
-def test_model():
-    data = pd.read_csv(DATA, header=None)
+def test_model(
+    dataset=DATA,
+    train_size=TRAIN_SIZE,
+    class_index=0,
+    begin=1,
+    end=None,
+    row_percentage=1,
+):
+    data = pd.read_csv(dataset, header=None)
     shuffled_data = data.sample(
-        frac=1, random_state=np.random.randint(0, 10000)
+        frac=row_percentage, random_state=np.random.randint(0, 10000)
     ).reset_index(drop=True)
-    split = int(0.6 * len(data))
-    train_data = shuffled_data.iloc[split:]
-    test_data = shuffled_data.iloc[:split]
-    features = train_data.iloc[:, 1:].values
-    targets = train_data.iloc[:, 0].values
-    tree = build(features, targets)
-    map_of_targets = {k: v for v, k in enumerate(np.unique(targets))}
-    confusion_matrix = np.zeros((2, 2))
+    split = int(train_size * len(shuffled_data))
+    train_data = shuffled_data.iloc[:split]
+    test_data = shuffled_data.iloc[split:]
+    attr_indices = list(
+        range(begin, end) if end is not None else range(begin, len(data.columns))
+    )
+    if class_index in attr_indices:
+        attr_indices.remove(class_index)
+    data = train_data.iloc[:, attr_indices].values
+    targets = train_data.iloc[:, class_index].values
+    attributes = list(range(data.shape[1]))
+    tree = build(data, targets, attributes)
+    unique_targets = np.unique(
+        np.concatenate(
+            (
+                train_data.iloc[:, class_index].values,
+                test_data.iloc[:, class_index].values,
+            )
+        )
+    )
+    map_of_targets = {k: v for v, k in enumerate(unique_targets)}
+    confusion_matrix = np.zeros((2, 2), dtype=int)
     count_positive = 0
     for i in range(len(test_data)):
-        features = test_data.iloc[i, 1:].values
-        target = test_data.iloc[i, 0]
-        prediction = predict(tree, features)
+        data = test_data.iloc[i, attr_indices].values
+        target = test_data.iloc[i, class_index]
+        prediction = predict(tree, data)
         if prediction is not None and target is not None:
             if prediction == target:
                 count_positive += 1
@@ -32,14 +54,12 @@ def test_model():
 
 
 if __name__ == "__main__":
-    data = pd.read_csv(DATA, header=None)
-    print(data)
     results = []
-    for _ in range(10000):
+    matrices = []
+    for i in range(100):
         test_accuracy = test_model()
-        # print("Accuracy:", test_accuracy[0])
         results.append(test_accuracy[0])
-        # print("Confusion matrix:\n", test_accuracy[1])
+        matrices.append(test_accuracy[1])
     mean_accuracy = np.mean(results)
     min_accuracy = np.min(results)
     max_accuracy = np.max(results)
@@ -48,3 +68,7 @@ if __name__ == "__main__":
     print("Min accuracy:", min_accuracy)
     print("Max accuracy:", max_accuracy)
     print("Std accuracy:", std_accuracy)
+    mean_matrix = np.mean(matrices, axis=0)
+    print("Mean confusion matrix:")
+    df_cm = pd.DataFrame(mean_matrix, index=["P", "N"], columns=["PP", "PN"])
+    print(df_cm, "\n")
