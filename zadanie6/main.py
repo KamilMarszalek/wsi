@@ -1,5 +1,6 @@
 import gymnasium as gym
 import numpy as np
+from qlearning import qlearning
 
 env = gym.make('FrozenLake-v1', desc=None, map_name='8x8', is_slippery=False)
 state_size = env.observation_space.n
@@ -17,40 +18,8 @@ num_episodes = 1000
 averaged_reward = np.zeros(num_episodes)
 
 print(env.unwrapped.desc)
-
-for run in range(num_of_ind_runs):
-    qtable = np.zeros((state_size, action_size))
-    epsilon = epsilon_init
-
-    for episode in range(num_episodes):
-        state, _ = env.reset()
-        state = 0
-        done = False
-        total_reward = 0
-
-        for step in range(200):
-            if np.random.uniform(0, 1) < epsilon or np.sum(qtable[state]) == 0:
-                action = env.action_space.sample()
-            else:
-                action = np.argmax(qtable[state])
-
-            new_state, reward, terminated, truncated, info = env.step(action)
-            new_state = int(new_state)
-            if (new_state) == 63:
-                print("Reached target: ", episode)
-                reward = 1
-            delta = reward + gamma * np.max(qtable[new_state, :]) - qtable[state, action]
-            qtable[state, action] += beta * delta
-            total_reward += reward
-            state = new_state
-            if terminated or truncated:
-                break
-
-        averaged_reward[episode] += total_reward
-        epsilon = max(epsilon_min, epsilon * epsilon_decay)
-
-averaged_reward /= num_of_ind_runs
-averaged_reward_base = np.copy(averaged_reward)
+averaged_reward = qlearning(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, num_of_ind_runs)
+averaged_reward_base = qlearning(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, num_of_ind_runs)
 print("Averaged rewards over episodes:", averaged_reward)
 
 
