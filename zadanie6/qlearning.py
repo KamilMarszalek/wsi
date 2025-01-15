@@ -1,6 +1,12 @@
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 
+def choose_action(env, qtable, state, epsilon):
+    if np.random.uniform(0, 1) < epsilon or np.sum(qtable[state]) == 0:
+        return env.action_space.sample()
+    return np.argmax(qtable[state])
+
+
 def single_run(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, reward_system):
     state_size = env.observation_space.n
     action_size = env.action_space.n
@@ -12,15 +18,10 @@ def single_run(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsi
 
     for episode in range(num_episodes):
         state, _ = env.reset()
-        state = 0
         total_reward = 0
 
         for _ in range(200):
-            if np.random.uniform(0, 1) < epsilon or np.sum(qtable[state]) == 0:
-                action = env.action_space.sample()
-            else:
-                action = np.argmax(qtable[state])
-
+            action = choose_action(env, qtable, state, epsilon)
             new_state, reward, terminated, truncated, _ = env.step(action)
             custom_reward = reward_system(reward, terminated, truncated, state, new_state)
             delta = custom_reward + gamma * np.max(qtable[new_state, :]) - qtable[state, action]
