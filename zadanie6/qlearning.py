@@ -1,7 +1,7 @@
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 
-def single_run(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min):
+def single_run(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, reward_system):
     state_size = env.observation_space.n
     action_size = env.action_space.n
 
@@ -22,7 +22,8 @@ def single_run(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsi
                 action = np.argmax(qtable[state])
 
             new_state, reward, terminated, truncated, _ = env.step(action)
-            delta = reward + gamma * np.max(qtable[new_state, :]) - qtable[state, action]
+            custom_reward = reward_system(reward, terminated, truncated, state, new_state)
+            delta = custom_reward + gamma * np.max(qtable[new_state, :]) - qtable[state, action]
             qtable[state, action] += beta * delta
             total_reward += reward
             state = new_state
@@ -34,8 +35,8 @@ def single_run(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsi
 
     return averaged_reward
 
-def qlearning(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, num_of_ind_runs):
+def qlearning(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, num_of_ind_runs, reward_system):
     with ProcessPoolExecutor() as executor:
-        results = [executor.submit(single_run, env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min) for _ in range(num_of_ind_runs)]
+        results = [executor.submit(single_run, env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, reward_system) for _ in range(num_of_ind_runs)]
         results = [result.result() for result in results]
     return np.mean(results, axis=0)

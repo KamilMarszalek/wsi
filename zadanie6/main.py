@@ -1,6 +1,7 @@
 import gymnasium as gym
 import numpy as np
 from qlearning import qlearning
+from reward_systems import *
 
 env = gym.make('FrozenLake-v1', desc=None, map_name='8x8', is_slippery=False)
 state_size = env.observation_space.n
@@ -18,8 +19,8 @@ num_episodes = 1000
 averaged_reward = np.zeros(num_episodes)
 
 print(env.unwrapped.desc)
-averaged_reward = qlearning(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, num_of_ind_runs)
-averaged_reward_base = qlearning(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, num_of_ind_runs)
+averaged_reward = qlearning(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, num_of_ind_runs, negative_hole_and_stagnation)
+averaged_reward_base = qlearning(env, num_episodes, beta, gamma, epsilon_init, epsilon_decay, epsilon_min, num_of_ind_runs, default_reward_system)
 print("Averaged rewards over episodes:", averaged_reward)
 
 
