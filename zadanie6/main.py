@@ -6,19 +6,17 @@ state_size = env.observation_space.n
 action_size = env.action_space.n
 
 gamma = 0.95
-beta = 0.15
+beta = 0.1
 epsilon_init = 1.0
 epsilon_delta = 0.00001
 epsilon_min = 0.01
+epsilon_decay = 0.995
 
-num_of_ind_runs = 20
-num_episodes = 80000
+num_of_ind_runs = 25
+num_episodes = 1000
 averaged_reward = np.zeros(num_episodes)
 
 print(env.unwrapped.desc)
-
-def boltzmann(qtable, state):
-    return np.exp(qtable[state]) / np.sum(np.exp(qtable[state]))
 
 for run in range(num_of_ind_runs):
     qtable = np.zeros((state_size, action_size))
@@ -30,7 +28,7 @@ for run in range(num_of_ind_runs):
         done = False
         total_reward = 0
 
-        for step in range(300):
+        for step in range(200):
             if np.random.uniform(0, 1) < epsilon or np.sum(qtable[state]) == 0:
                 action = env.action_space.sample()
             else:
@@ -39,20 +37,17 @@ for run in range(num_of_ind_runs):
             new_state, reward, terminated, truncated, info = env.step(action)
             new_state = int(new_state)
             if (new_state) == 63:
-                # print("Reached target: ", episode)
+                print("Reached target: ", episode)
                 reward = 1
-
-            qtable[state, action] += beta * (
-                reward + gamma * np.max(qtable[new_state]) - qtable[state, action]
-            )
-
+            delta = reward + gamma * np.max(qtable[new_state, :]) - qtable[state, action]
+            qtable[state, action] += beta * delta
             total_reward += reward
             state = new_state
             if terminated or truncated:
                 break
 
         averaged_reward[episode] += total_reward
-        epsilon = max(epsilon_min, epsilon - epsilon_delta)
+        epsilon = max(epsilon_min, epsilon * epsilon_decay)
 
 averaged_reward /= num_of_ind_runs
 averaged_reward_base = np.copy(averaged_reward)
