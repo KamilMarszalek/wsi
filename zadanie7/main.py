@@ -26,7 +26,7 @@ def set_children_and_parents(edges: list[list[str]], vertices: dict[str, "Node"]
 def set_cpt(vertices: dict[str, "Node"], cpts: list[str]) -> None:
     for cpt in cpts:
         expr, value = [rec.strip() for rec in cpt.split(" = ")]
-        vertex_name = expr[2]
+        vertex_name = expr.split("=")[0][2:]
         expr = expr[2:-1]
         if vertex_name in vertices:
             vertices[vertex_name].cpt[expr] = float(value)
