@@ -3,10 +3,16 @@ import random
 from collections import Counter, deque
 import pandas as pd
 import sys
-sys.path.append('/home/kamil/wsi')
+
+sys.path.append("/home/kamil/wsi")
 import zadanie4.main as id3
 
-def load_network_from_file(file_name: str) -> dict[str, "Node"]:
+SAMPLES = 10000
+CSV_FILE = "ache.csv"
+NETWORK_FILE = "network.txt"
+
+
+def load_network_from_file(file_name: str = NETWORK_FILE) -> dict[str, "Node"]:
     with open(file_name) as file_handle:
         nodes = file_handle.readline()[6:]
         vertices = {node.strip(): Node(node.strip()) for node in nodes.split(sep=",")}
@@ -18,7 +24,9 @@ def load_network_from_file(file_name: str) -> dict[str, "Node"]:
         return vertices
 
 
-def set_children_and_parents(edges: list[list[str]], vertices: dict[str, "Node"]) -> None:
+def set_children_and_parents(
+    edges: list[list[str]], vertices: dict[str, "Node"]
+) -> None:
     for edge in edges:
         parent_vertex = vertices[edge[0]]
         child_vertex = vertices[edge[1]]
@@ -51,8 +59,9 @@ def topological_sort(vertices: dict[str, "Node"]) -> list[str]:
             in_degree[child.vertex] -= 1
             if in_degree[child.vertex] == 0:
                 queue.append(child.vertex)
-    
+
     return sorted_nodes
+
 
 def generate_sample(vertices: dict[str, "Node"]) -> dict[str, str]:
     sorted_nodes = topological_sort(vertices)
@@ -63,11 +72,14 @@ def generate_sample(vertices: dict[str, "Node"]) -> dict[str, str]:
         if not node.parents:
             prob = node.cpt[f"{node_name}=true"]
         else:
-            conditions = ",".join([f"{parent.vertex}={values[parent.vertex]}" for parent in node.parents])
+            conditions = ",".join(
+                [f"{parent.vertex}={values[parent.vertex]}" for parent in node.parents]
+            )
             prob = node.cpt[f"{node_name}=true|{conditions}"]
         values[node_name] = "true" if random.random() < prob else "false"
-    
+
     return values
+
 
 def generate_sample_without_sorting(vertices: dict[str, "Node"]) -> dict[str, str]:
     values = {}
@@ -80,24 +92,28 @@ def generate_sample_without_sorting(vertices: dict[str, "Node"]) -> dict[str, st
                 if not node.parents:
                     prob = node.cpt[f"{node_name}=true"]
                 else:
-                    conditions = ",".join([f"{parent.vertex}={values[parent.vertex]}" for parent in node.parents])
+                    conditions = ",".join(
+                        [
+                            f"{parent.vertex}={values[parent.vertex]}"
+                            for parent in node.parents
+                        ]
+                    )
                     prob = node.cpt[f"{node_name}=true|{conditions}"]
                 values[node_name] = "true" if random.random() < prob else "false"
                 unvisited.remove(node_name)
     return values
 
 
-
-def test_sampling(network: dict[str, "Node"], samples: int=100000) -> None:
+def test_sampling(network: dict[str, "Node"], samples: int = SAMPLES) -> None:
     counter = Counter()
     condition_counter = Counter()
 
     for _ in range(samples):
-        sample = generate_sample(network)
+        sample = generate_sample_without_sorting(network)
 
         for node_name, value in sample.items():
             parents_str = ",".join(
-                f"{parent.vertex}={sample[parent.vertex]}" 
+                f"{parent.vertex}={sample[parent.vertex]}"
                 for parent in network[node_name].parents
             )
             if parents_str:
@@ -116,8 +132,8 @@ def test_sampling(network: dict[str, "Node"], samples: int=100000) -> None:
         print(f"Node: {node_name}")
         for condition, expected_prob in node.cpt.items():
             if "|" in condition:
-                left_side, right_side = condition.split("|")
-                event_key = condition  
+                _, right_side = condition.split("|")
+                event_key = condition
 
                 cond_key = f"{node_name}|{right_side}"
 
@@ -133,19 +149,24 @@ def test_sampling(network: dict[str, "Node"], samples: int=100000) -> None:
                 observed_count = counter[event_key]
                 observed_frequency = observed_count / samples
 
-            print(f"  Condition: {condition}, Observed: {observed_frequency:.4f}, "
-                  f"Expected: {expected_prob:.4f}")
-            
-def generate_data(network, samples, output_file):
+            print(
+                f"  Condition: {condition}, Observed: {observed_frequency:.4f}, "
+                f"Expected: {expected_prob:.4f}"
+            )
+
+
+def generate_data(
+    network: dict[str, "Node"], samples: int = 10000, output_file: str = CSV_FILE
+) -> None:
     data = [generate_sample(network) for _ in range(samples)]
     df = pd.DataFrame(data)
     df.to_csv(output_file, index=False)
 
 
-
 if __name__ == "__main__":
-    network = load_network_from_file("network.txt")
-    generate_data(network, 1000, "ache.csv")
-    accuracy, matrix = id3.test_model("ache.csv", 0.6, 3, 0, 3)
-    print("Accuracy: ", accuracy)
+    network = load_network_from_file()
+    test_sampling(network)
+    generate_data(network)
+    accuracy, matrix = id3.test_model(CSV_FILE, 0.6, 3, 0, 3)
+    print("\nAccuracy: ", accuracy)
     print(matrix)
