@@ -1,4 +1,4 @@
-from id3 import *
+from zadanie4.id3 import *
 import pandas as pd
 import numpy as np
 from typing import Tuple
@@ -17,7 +17,7 @@ def test_model(
     end: Optional[int] = None,
     row_percentage: float = 1,
 ) -> Tuple[float, np.ndarray]:
-    data = pd.read_csv(dataset, header=None)
+    data = pd.read_csv(dataset, header=0)
     shuffled_data = data.sample(
         frac=row_percentage, random_state=np.random.randint(0, 10000)
     ).reset_index(drop=True)

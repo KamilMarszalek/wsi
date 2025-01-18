@@ -1,7 +1,10 @@
 from node import Node
 import random
 from collections import Counter, deque
-
+import pandas as pd
+import sys
+sys.path.append('/home/kamil/wsi')
+import zadanie4.main as id3
 
 def load_network_from_file(file_name: str) -> dict[str, "Node"]:
     with open(file_name) as file_handle:
@@ -132,8 +135,17 @@ def test_sampling(network: dict[str, "Node"], samples: int=100000) -> None:
 
             print(f"  Condition: {condition}, Observed: {observed_frequency:.4f}, "
                   f"Expected: {expected_prob:.4f}")
+            
+def generate_data(network, samples, output_file):
+    data = [generate_sample(network) for _ in range(samples)]
+    df = pd.DataFrame(data)
+    df.to_csv(output_file, index=False)
+
 
 
 if __name__ == "__main__":
     network = load_network_from_file("network.txt")
-    test_sampling(network)
+    generate_data(network, 1000, "ache.csv")
+    accuracy, matrix = id3.test_model("ache.csv", 0.6, 3, 0, 3)
+    print("Accuracy: ", accuracy)
+    print(matrix)
