@@ -3,7 +3,7 @@ import random
 from collections import Counter, deque
 
 
-def load_network_from_file(file_name):
+def load_network_from_file(file_name: str) -> dict[str, "Node"]:
     with open(file_name) as file_handle:
         nodes = file_handle.readline()[6:]
         vertices = {node.strip(): Node(node.strip()) for node in nodes.split(sep=",")}
@@ -15,7 +15,7 @@ def load_network_from_file(file_name):
         return vertices
 
 
-def set_children_and_parents(edges, vertices):
+def set_children_and_parents(edges: list[list[str]], vertices: dict[str, "Node"]) -> None:
     for edge in edges:
         parent_vertex = vertices[edge[0]]
         child_vertex = vertices[edge[1]]
@@ -23,7 +23,7 @@ def set_children_and_parents(edges, vertices):
         child_vertex.parents.append(parent_vertex)
 
 
-def set_cpt(vertices: dict[str, "Node"], cpts):
+def set_cpt(vertices: dict[str, "Node"], cpts: list[str]) -> None:
     for cpt in cpts:
         expr, value = [rec.strip() for rec in cpt.split(" = ")]
         vertex_name = expr[2]
@@ -32,7 +32,7 @@ def set_cpt(vertices: dict[str, "Node"], cpts):
             vertices[vertex_name].cpt[expr] = float(value)
 
 
-def topological_sort(vertices):
+def topological_sort(vertices: dict[str, "Node"]) -> list[str]:
     in_degree = {node: 0 for node in vertices}
     for vertex in vertices.values():
         for child in vertex.children:
@@ -51,7 +51,7 @@ def topological_sort(vertices):
     
     return sorted_nodes
 
-def generate_sample(vertices):
+def generate_sample(vertices: dict[str, "Node"]) -> dict[str, str]:
     sorted_nodes = topological_sort(vertices)
     values = {}
 
@@ -66,7 +66,7 @@ def generate_sample(vertices):
     
     return values
 
-def generate_sample_without_sorting(vertices):
+def generate_sample_without_sorting(vertices: dict[str, "Node"]) -> dict[str, str]:
     values = {}
     unvisited = set(vertices.keys())
 
@@ -85,7 +85,7 @@ def generate_sample_without_sorting(vertices):
 
 
 
-def test_sampling(network, samples=100000):
+def test_sampling(network: dict[str, "Node"], samples: int=100000) -> None:
     counter = Counter()
     condition_counter = Counter()
 
