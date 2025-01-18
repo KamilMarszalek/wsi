@@ -1,13 +1,12 @@
-from node import Node
 import random
 from collections import Counter, deque
 import pandas as pd
 import sys
-
+from node import Node
 sys.path.append("/home/kamil/wsi")
 import zadanie4.main as id3
 
-SAMPLES = 10000
+SAMPLES = 20000
 CSV_FILE = "ache.csv"
 NETWORK_FILE = "network.txt"
 
