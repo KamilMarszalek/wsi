@@ -1,0 +1,10 @@
+NODES: C, S, B, A
+EDGES: C->B, S->B, B->A
+P(C=true) = 0.8
+P(S=true) = 0.02
+P(B=true|C=true,S=true) = 0.9
+P(B=true|C=true,S=false) = 0.2
+P(B=true|C=false,S=true) = 0.9
+P(B=true|C=false,S=false) = 0.01
+P(A=true|B=true) = 0.7
+P(A=true|B=false) = 0.1
