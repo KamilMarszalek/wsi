@@ -2,6 +2,7 @@ import random
 from collections import Counter, deque
 import pandas as pd
 import sys
+import numpy as np
 from node import Node
 sys.path.append("/home/kamil/wsi")
 import zadanie4.main as id3
@@ -164,8 +165,23 @@ def generate_data(
 
 if __name__ == "__main__":
     network = load_network_from_file()
-    test_sampling(network)
+    # test_sampling(network)
     generate_data(network)
-    accuracy, matrix = id3.test_model(CSV_FILE, 0.6, 3, 0, 3)
-    print("\nAccuracy: ", accuracy)
-    print(matrix)
+    results = []
+    matrices = []
+    for i in range(100):
+        accuracy, matrix = id3.test_model(CSV_FILE, 0.6, 3, 0, 3)
+        results.append(accuracy)
+        matrices.append(matrix)
+    mean_accuracy = np.mean(results)
+    min_accuracy = np.min(results)
+    max_accuracy = np.max(results)
+    std_accuracy = np.std(results)
+    print("Mean accuracy:", mean_accuracy)
+    print("Min accuracy:", min_accuracy)
+    print("Max accuracy:", max_accuracy)
+    print("Std accuracy:", std_accuracy)
+    mean_matrix = np.mean(matrices, axis=0)
+    print("Mean confusion matrix:")
+    df_cm = pd.DataFrame(mean_matrix, index=["P", "N"], columns=["PP", "PN"])
+    print(df_cm, "\n")
