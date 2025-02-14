@@ -5,7 +5,7 @@ import sys
 import numpy as np
 from node import Node
 sys.path.append("/home/kamil/wsi")
-import zadanie4.main as id3
+import id3.main as id3
 
 SAMPLES = 20000
 CSV_FILE = "ache.csv"
