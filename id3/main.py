@@ -1,7 +1,7 @@
 from id3 import *
 import pandas as pd
 import numpy as np
-from typing import Tuple
+from typing import Tuple, Optional
 
 
 DATA_SETS = ["data/agaricus-lepiota.data", "data/breast-cancer.data"]
