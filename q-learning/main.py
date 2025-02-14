@@ -4,7 +4,7 @@ from qlearning import qlearning
 from reward_systems import *
 import matplotlib.pyplot as plt
 
-env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=True)
+env = gym.make("FrozenLake-v1", desc=None, map_name="8x8", is_slippery=False)
 state_size = env.observation_space.n
 action_size = env.action_space.n
 
@@ -15,7 +15,7 @@ epsilon_min = 0.01
 epsilon_decay = 0.97
 
 num_of_ind_runs = 25
-num_episodes = 10000
+num_episodes = 1000
 averaged_reward = np.zeros(num_episodes)
 
 averaged_reward = qlearning(
