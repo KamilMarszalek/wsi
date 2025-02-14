@@ -44,7 +44,7 @@ This installs all required packages listed in `requirements.txt`.
 
 #### 5. Verify Installation
 ```sh
-python -c "import numpy, pandas, matplotlib, gymnasium; print('Setup complete!')"
+python3 -c "import numpy, pandas, matplotlib, gymnasium; print('Setup complete!')"
 ```
 If no errors appear, the setup is successful.
 
@@ -55,9 +55,9 @@ deactivate
 ```
 
 ## Running Scripts
-To run any Python script, make sure the virtual environment is activated and execute:
+To run any Python script, make sure the virtual environment is activated and execute for example:
 ```sh
-python your_script.py
+python3 gradient-descent/part_2/main.py 
 ```
 
 ## Troubleshooting
