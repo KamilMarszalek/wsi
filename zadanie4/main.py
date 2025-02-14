@@ -1,11 +1,11 @@
-from zadanie4.id3 import *
+from id3 import *
 import pandas as pd
 import numpy as np
 from typing import Tuple
 
 
-DATA_SETS = ["agaricus-lepiota.data", "breast-cancer.data"]
-DATA = DATA_SETS[0]
+DATA_SETS = ["data/agaricus-lepiota.data", "data/breast-cancer.data"]
+DATA = DATA_SETS[1]
 TRAIN_SIZE = 0.6
 
 
