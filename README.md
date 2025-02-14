@@ -15,8 +15,8 @@ To ensure a consistent development environment, we use Python's built-in `venv` 
 
 #### 1. Clone the Repository
 ```sh
-git clone <repository_url>
-cd <repository_name>
+git clone https://github.com/KamilMarszalek/wsi
+cd wsi
 ```
 
 #### 2. Create a Virtual Environment
