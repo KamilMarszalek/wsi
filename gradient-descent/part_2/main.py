@@ -8,11 +8,11 @@ from constants import LIMIT, DIMENSIONS, MAX_ITER, COLORS
 from concurrent.futures import ThreadPoolExecutor
 
 
-# BETA = 1e-9  # f1
+BETA = 1e-9  # f1
 # BETA = 1e-18  # f2
-BETA = 1e-9  # f3
+# BETA = 1e-9  # f3
 # BETA = 0.03  # booth
-FUNCTION = f2
+FUNCTION = f1
 DIM_1 = 0
 DIM_2 = 1
 
