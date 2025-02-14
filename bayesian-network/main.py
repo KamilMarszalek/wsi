@@ -8,8 +8,8 @@ sys.path.append("/home/kamil/wsi")
 import id3.main as id3
 
 SAMPLES = 20000
-CSV_FILE = "ache.csv"
-NETWORK_FILE = "network.txt"
+CSV_FILE = "bayesian-network/assets/ache.csv"
+NETWORK_FILE = "bayesian-network/assets/network.txt"
 
 
 def load_network_from_file(file_name: str = NETWORK_FILE) -> dict[str, "Node"]:
@@ -165,7 +165,7 @@ def generate_data(
 
 if __name__ == "__main__":
     network = load_network_from_file()
-    # test_sampling(network)
+    test_sampling(network)
     generate_data(network)
     results = []
     matrices = []
